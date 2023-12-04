@@ -29,7 +29,7 @@ def dataset_sanity_check(root_folder):
                     raise ValueError("headers[2] is not true or false but is " + str(label))
 
 
-
+#TODO: Improve this function accuracy and visualization quality  
 
 
 def find_matching_rear_image(image_path):
