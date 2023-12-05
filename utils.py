@@ -3,13 +3,6 @@ from termcolor import colored
 PATH = os.path.dirname(__file__)
 DATA_PATH = os.path.join(PATH,"Data")
 
-
-
-          
-
-#TODO: Improve this function accuracy and visualization quality  
-
-
 def find_matching_rear_image(image_path):
     couples = []
     front_images = [f for f in os.listdir(image_path) if f.startswith('fronte')]
