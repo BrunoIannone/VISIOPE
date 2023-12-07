@@ -1,7 +1,10 @@
 import os
-from utils import DATA_PATH, dataset_sanity_check
+from utils import DATA_PATH
+import dataset_integrity_checks
 from termcolor import colored
 from PIL import Image
+from pathlib import Path
+
 
 def find_matching_rear_image(image_path):
     couples = []
@@ -27,10 +30,10 @@ def build_couples(root_folder):
                 
     return res
     
-root_folder = DATA_PATH
-#couples = build_couples(root_folder)
+root_folder = Path(DATA_PATH)
+dataset_integrity_checks.dataset_sanity_check(root_folder)#couples = build_couples(root_folder)
 #print(couples)
-dataset_sanity_check(DATA_PATH)
+
 # for image in couples:
 #     Image.open(image[0]).show()
     
