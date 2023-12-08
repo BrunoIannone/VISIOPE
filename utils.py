@@ -1,22 +1,46 @@
 import os
 from termcolor import colored
-PATH = os.path.dirname(__file__)
-DATA_PATH = os.path.join(PATH,"Data")
+import cv2
+from typing import List
+import warnings
 
-def find_matching_rear_image(image_path):
-    couples = []
-    front_images = [f for f in os.listdir(image_path) if f.startswith('fronte')]
-    #print(front_images)
-    rear_images = [f for f in os.listdir(image_path) if f.startswith('retro')]
-    #print(rear_images)
-    if len(front_images) != len(rear_images):
-        raise ValueError("Number of front and rear images is different in " + str(image_path))
-    for f_image in front_images:
-        headers = f_image.split("$")
-        
-        for r_image in rear_images:
-            headers2 = r_image.split("$")
-            if headers[1] == headers[2]:
-                couples.append((f_image,r_image))
-        couples.append((os.path.join(image_path,f_image),os.path.join(image_path,"retro$"+str(headers[1]) + "$"+str(headers[2]))))
-    return couples
+PATH = os.path.dirname(__file__)
+DATA_PATH = os.path.join(PATH, "Data")
+
+
+def show_dataset(image_couples: List[tuple]):
+    """Show front and rear image for each sample in image_couples
+
+    Args:
+        image_couples (List[tupke]):List containing tuples of string representing front and rear image path. For instance [(front_path.jpg,rear_path.jpg)]
+    """
+    if image_couples == None or image_couples == []:
+        warnings.warn(
+            "Invoked show_dataset with image_couples = None or []", RuntimeWarning
+        )
+        return
+    for image in image_couples:
+        cv2.namedWindow("Front", cv2.WINDOW_NORMAL)  # cv2.WINDOW_NORMAL allows resizing
+
+        # Set the size of the window
+        cv2.resizeWindow("Front", 800, 600)
+
+        # print(colored("FRONT","light_cyan"))
+
+        front = cv2.imread(image[0])
+        cv2.imshow("Front", front)
+
+        # print(colored("REAR","light_cyan"))
+
+        cv2.namedWindow("Rear", cv2.WINDOW_NORMAL)  # cv2.WINDOW_NORMAL allows resizing
+        cv2.resizeWindow("Rear", 800, 600)
+        rear = cv2.imread(image[1])
+
+        cv2.imshow("Rear", rear)
+        key = cv2.waitKey(0)
+        if key == 27:
+            cv2.destroyAllWindows()
+            print(colored("Exiting...", "red"))
+            return
+
+    print(colored("Showed last image", "green"))
