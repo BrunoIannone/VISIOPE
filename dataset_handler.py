@@ -2,15 +2,18 @@ from pathlib import Path
 from dataset_integrity_checker import DatasetIntegrityChecker
 from termcolor import colored
 import os
+import csv
+import cv2
+from PIL import Image
 
 
 class DatasetHandler:
-    def __init__(self, root_folder: Path, training_folder, eval_folder, test_folder):
+    def __init__(self, root_folder: Path, training_folder, valid_folder, test_folder):
         self.root_folder = root_folder
 
-        self.training_couples = (
-            self._build_couples()
-        )  # training_folder, eval_folder, test_folder)
+        self.training_samples = self._build_data(training_folder)
+        self.eval_samples = self._build_data(valid_folder)
+        self.test_samples = self._build_data(test_folder)
 
     def _find_matching_rear_image(self, image_path):
         couples = []
@@ -58,3 +61,29 @@ class DatasetHandler:
 
     def perform_sanity_check(self):
         DatasetIntegrityChecker(self.root_folder).dataset_sanity_check()
+
+    def _build_data(self, data_folder):
+        image = []
+        labels = []
+        with open(data_folder / "_classes.csv", "r") as class_csv:
+            class_csv.seek(0)
+            csv_reader = csv.reader(class_csv)
+            # line = next(csv_reader)
+            # print(line)
+
+            for file in os.listdir(data_folder):
+                # print(file)
+                if not file.endswith(".jpg"):
+                    continue
+                for row in csv_reader:
+                    # print(row)
+                    if file in row:
+                        image.append(cv2.imread(str(data_folder / file)))
+                        labels.append(row)
+                        # print("MATCH")
+                        class_csv.seek(0)
+                        break
+
+        if len(image) != len(labels):
+            raise RuntimeError("Images and labels list lenghts do not match")
+        return image, labels

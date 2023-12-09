@@ -4,8 +4,14 @@ import cv2
 from typing import List
 import warnings
 
+
 PATH = os.path.dirname(__file__)
+STACKED_PATH = os.path.join(PATH, "Stacked")
 DATA_PATH = os.path.join(PATH, "Data")
+ROBO_PATH = os.path.join(PATH, "ROBO_DATA")
+TRAINING_PATH = os.path.join(PATH, ROBO_PATH + "/train")
+VALID_PATH = os.path.join(PATH, ROBO_PATH + "/valid")
+TEST_PATH = os.path.join(PATH, ROBO_PATH + "/test")
 
 
 def show_dataset(image_couples: List[tuple]):
@@ -44,3 +50,55 @@ def show_dataset(image_couples: List[tuple]):
             return
 
     print(colored("Showed last image", "green"))
+
+
+from PIL import Image
+
+
+def fast_show(image):
+    cv2.imshow("Image", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+def stack_and_resize_images(image_list, output_path, resize_dimensions=(300, 300)):
+    i = 0
+    for image_tuple in image_list:
+        # print([image_tuple])
+        try:
+            # Load images
+            image1 = Image.open(image_tuple[0])
+            image2 = Image.open(image_tuple[1])
+
+            # Resize images
+            image1 = image1.resize(resize_dimensions)
+            image2 = image2.resize(resize_dimensions)
+
+            # Get the size of the stacked image
+            new_width = image1.width + image2.width
+            new_height = max(image1.height, image2.height)
+
+            # Create a new image with the calculated size
+            stacked_image = Image.new("RGB", (new_width, new_height))
+
+            # Paste the resized images onto the new image
+            stacked_image.paste(image1, (0, 0))
+            stacked_image.paste(image2, (image1.width, 0))
+
+            # Save the stacked and resized image to the specified output path
+            print(stacked_image)
+            stacked_image.save(
+                os.path.join(output_path, str(i) + "$" + image_tuple[0].split("$")[2]),
+                "png",
+            )
+            i += 1
+            # print(f"Stacked and resized image saved to: {output_path}")
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+
+# # Example usage:
+# image_paths_list = [("image1_path.jpg", "image2_path.jpg")]
+# output_path = "output_stacked_image.jpg"
+# stack_and_resize_images(image_paths_list[0], output_path)
