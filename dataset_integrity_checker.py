@@ -231,4 +231,3 @@ class DatasetIntegrityChecker:
 # sanity_checker = DatasetIntegrityChecker(root_folder)
 # sanity_checker.rename_images("fronte", "retro")
 # sanity_checker.dataset_sanity_check()
-# print("si")

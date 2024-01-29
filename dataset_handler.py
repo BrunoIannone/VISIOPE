@@ -6,16 +6,49 @@ import csv
 import cv2
 from PIL import Image
 
+import time
+
 
 class DatasetHandler:
+    """Class that implements some methods that perform operations for the dataset"""
+
     def __init__(self, root_folder: Path, training_folder, valid_folder, test_folder):
+        """Initialize the Dataset Handler.
+
+        Args:
+            root_folder (Path): The root path where the dataset is stored.
+            training_folder (str): The relative path to the training dataset within the root folder.
+            valid_folder (str): The relative path to the validation dataset within the root folder.
+            test_folder (str): The relative path to the test dataset within the root folder.
+
+        Attributes:
+            root_folder (Path): The root path where the dataset is stored.
+            training_samples (List[YourDataType]): A list of training samples built from the specified folder.
+            eval_samples (List[YourDataType]): A list of validation samples built from the specified folder.
+            test_samples (List[YourDataType]): A list of test samples built from the specified folder.
+
+        Note:
+            The `_build_data` method is used internally to construct sample lists from the provided folders.
+
+        """
         self.root_folder = root_folder
 
         self.training_samples = self._build_data(training_folder)
         self.eval_samples = self._build_data(valid_folder)
         self.test_samples = self._build_data(test_folder)
 
-    def _find_matching_rear_image(self, image_path):
+    def _find_matching_rear_image(self, image_path: str):
+        """_summary_
+
+        Args:
+            image_path (_type_): _description_
+
+        Raises:
+            ValueError: _description_
+
+        Returns:
+            _type_: _description_
+        """
         couples = []
         front_images = [f for f in os.listdir(image_path) if f.startswith("front")]
         # print(front_images)
@@ -79,11 +112,23 @@ class DatasetHandler:
                     # print(row)
                     if file in row:
                         image.append(cv2.imread(str(data_folder / file)))
-                        labels.append(row)
-                        # print("MATCH")
+                        labels.append(
+                            self.return_label(row[1:])
+                        )  # discard the string path in pos 0
+                        # print(labels)
+                        # time.sleep(5)
                         class_csv.seek(0)
                         break
 
         if len(image) != len(labels):
             raise RuntimeError("Images and labels list lenghts do not match")
         return image, labels
+
+    def return_label(self, row):
+        res = []
+
+        for i in range(len(row)):
+            if row[i].strip() == "1":
+                res.append(i + 1)
+
+        return res
