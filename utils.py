@@ -3,15 +3,31 @@ from termcolor import colored
 import cv2
 from typing import List
 import warnings
+from pathlib import Path
+import csv
 
-
-PATH = os.path.dirname(__file__)
-STACKED_PATH = os.path.join(PATH, "Stacked")
+PATH = Path(os.path.dirname(__file__))
+STACKED_PATH = PATH / "Stacked"
 DATA_PATH = os.path.join(PATH, "Data")
-ROBO_PATH = os.path.join(PATH, "ROBO_DATA")
-TRAINING_PATH = os.path.join(PATH, ROBO_PATH + "/train")
-VALID_PATH = os.path.join(PATH, ROBO_PATH + "/valid")
-TEST_PATH = os.path.join(PATH, ROBO_PATH + "/test")
+ROBO_PATH = PATH / "ROBO_DATA"
+TRAINING_PATH = PATH / ROBO_PATH / "train"
+VALID_PATH = PATH / ROBO_PATH / "valid"
+TEST_PATH = PATH / ROBO_PATH / "test"
+MODEL_NAME = "google/vit-base-patch16-224"
+LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"
+BATCH_SIZE = 1
+CKPT_SAVE_DIR_NAME = PATH / "Saves/ckpt/"
+NUM_EPOCHS = [100]
+NUM_WORKERS = 0
+
+
+FC_LR = [1e-3]  # , 1e-4, 1e-5]
+CNN_LR = [0]  # , 1e-4]#, 1e-5]
+
+CNN_WD = [0.001]  # ,0.01,0.1]
+FC_WD = [0]  # ,0.01,0.1]
+
+FC_DROPOUT = [0.4]
 
 
 def show_dataset(image_couples: List[tuple]):
@@ -102,3 +118,31 @@ def stack_and_resize_images(image_list, output_path, resize_dimensions=(300, 300
 # image_paths_list = [("image1_path.jpg", "image2_path.jpg")]
 # output_path = "output_stacked_image.jpg"
 # stack_and_resize_images(image_paths_list[0], output_path)
+def build_couples(dir):
+    """Build a csv with row sample_path, label (folder name)
+
+    Args:
+        dir (str): Dataset folder
+
+
+    """
+    # Get a list of all items (files and subfolders) in the root folder
+    res = []
+    for action_folder in os.listdir(dir):
+        # print(colored(action_folder, "red"))
+        for action_image in os.listdir(dir / action_folder):
+            # print(image_folder)
+            res.append((dir / action_folder / action_image, action_folder))
+
+    csv_file_path = "predictions2.csv"
+    # Open the CSV file in write mode
+    with open(csv_file_path, "w", newline="") as csv_file:
+        # Create a CSV writer object
+        csv_writer = csv.writer(csv_file)
+        # Write the header if needed (optional)
+        csv_writer.writerow(["Image", "Label"])
+        for elem in res:
+            # Write the predictions to the CSV file
+            csv_writer.writerow((str(elem[0]), elem[1]))
+
+    print(f"Train data been written to {csv_file_path}.")
