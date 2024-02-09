@@ -8,7 +8,7 @@ import csv
 
 PATH = Path(os.path.dirname(__file__))
 STACKED_PATH = PATH / "Stacked Data"
-DATA_PATH = os.path.join(PATH, "Data")
+DATA_PATH = PATH / "Data"
 ROBO_PATH = PATH / "ROBO_DATA"
 TRAINING_PATH = PATH / ROBO_PATH / "train"
 VAL_PATH = PATH / ROBO_PATH / "valid"
@@ -77,6 +77,9 @@ def fast_show(image):
     cv2.destroyAllWindows()
 
 
+import time
+
+
 def stack_and_resize_images(image_list, output_path, resize_dimensions=(300, 300)):
     i = 0
     for image_tuple in image_list:
@@ -102,10 +105,26 @@ def stack_and_resize_images(image_list, output_path, resize_dimensions=(300, 300
             stacked_image.paste(image2, (image1.width, 0))
 
             # Save the stacked and resized image to the specified output path
-            print(stacked_image)
+            # print(stacked_image)
+            # stacked_image.save(
+            #     os.path.join(output_path, str(i) + "$" + image_tuple[0].split("$")[2]),
+            #     "png",
+            # )
+            print(
+                os.path.join(output_path, str(i) + "$" + image_tuple[0].split("$")[2])
+            )
+
+            # time.sleep(10)
             stacked_image.save(
-                os.path.join(output_path, str(i) + "$" + image_tuple[0].split("$")[2]),
-                "png",
+                os.path.join(
+                    output_path
+                    / str(
+                        image_tuple[2]
+                        + " "
+                        + image_tuple[0].split("$")[2].split(".")[0]
+                    ),
+                    str(i) + "$" + image_tuple[0].split("$")[2],
+                ),
             )
             i += 1
             # print(f"Stacked and resized image saved to: {output_path}")

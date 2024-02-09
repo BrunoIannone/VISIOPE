@@ -33,11 +33,12 @@ class DatasetHandler:
         """
         self.root_folder = root_folder
 
-        self.training_samples = self._build_data(training_folder)
-        self.eval_samples = self._build_data(valid_folder)
-        self.test_samples = self._build_data(test_folder)
+        # self.training_samples = self._build_data(training_folder)
+        # self.eval_samples = self._build_data(valid_folder)
+        # self.test_samples = self._build_data(test_folder)
+        self.training_samples = self._build_couples()
 
-    def _find_matching_rear_image(self, image_path: str):
+    def _find_matching_rear_image(self, image_path: str, console):
         """_summary_
 
         Args:
@@ -66,6 +67,7 @@ class DatasetHandler:
                     os.path.join(
                         image_path, "rear$" + str(headers[1]) + "$" + str(headers[2])
                     ),
+                    console,
                 )
             )
         return couples
@@ -87,7 +89,7 @@ class DatasetHandler:
             for image_folder in os.listdir(self.root_folder / console_folder):
                 # print(image_folder)
                 res += self._find_matching_rear_image(
-                    self.root_folder / console_folder / image_folder
+                    self.root_folder / console_folder / image_folder, console_folder
                 )
 
         return res

@@ -63,7 +63,7 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         Returns:
             tuple: (image, labels) open image_path and return the tuple (image,label) related to the index-th element
         """
-        target_size = (2000, 1000)
+        target_size = (2000, 2000)
 
         # convert index-th sample senses in indices
         resize_transform = v2.Compose(
