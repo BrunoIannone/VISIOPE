@@ -12,8 +12,7 @@ import pytorch_lightning as pl
 import time
 import torchmetrics
 import utils
-from torchmetrics.classification import MultilabelConfusionMatrix
-from torchvision import transforms, models
+from torchvision import transforms
 import numpy as np
 import datetime
 from transformers import ViTImageProcessor, ViTForImageClassification
@@ -52,12 +51,21 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         self.console_names = console_names
         self.console_labels = console_labels
         self.cf_matrix_filename = cf_matrix_filename
-
-        self.model = models.resnet18(pretrained=True)
+        self.processor = ViTImageProcessor.from_pretrained(
+            "google/vit-base-patch16-224",
+            num_labels=5,
+            ignore_mismatched_sizes=True,
+        )
+        self.transformer_model = ViTForImageClassification.from_pretrained(
+            "google/vit-base-patch16-224",
+            return_dict=True,
+            num_labels=5,
+            ignore_mismatched_sizes=True,
+        )
         self.flatten = nn.Flatten()
-        self.model.fc = torch.nn.Linear(self.model.fc.in_features, 5)
+
         # Fully connected layers for classification
-        # self.fc1 = nn.Linear(768, 5)
+        self.fc1 = nn.Linear(768, 5)
 
         self.fc_dropout = nn.Dropout(fc_dropout)
 
@@ -79,33 +87,48 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         self.test_accuracy = torchmetrics.Accuracy(
             task="multilabel", num_labels=self.num_labels
         )
-        self.conf_mat = MultilabelConfusionMatrix(num_labels=5)
         self.y_pred = torch.Tensor().cuda().detach()
         self.test_labels = torch.Tensor().cuda().detach()
 
         self.save_hyperparameters()
 
     def forward(self, x):
-        x = self.model(x)
+        x = self.transformer_model(**x, output_hidden_states=True)
+        hidden_states = x.hidden_states[-1]  # Access the last layer's hidden states
+        cls_token = hidden_states[:, 0, :]  # Select the CLS token
+
         # Apply dropout if needed
-        # x = self.fc_dropout(x)
+        cls_token = self.fc_dropout(cls_token)
 
         # Pass through the linear layer
-        # logits = self.fc1(x)
+        logits = self.fc1(cls_token)
         # print(logits)
-        return x
+        return logits
 
     def configure_optimizers(self):
-
-        optimizer = torch.optim.AdamW(self.model.parameters())
+        groups = [
+            {
+                "params": self.fc1.parameters(),
+                "lr": 1e-2,
+                "weight_decay": 0,
+            },
+            {
+                "params": self.transformer_model.parameters(),
+                "lr": 1e-5,
+                "weight_decay": 0,
+            },
+        ]
+        optimizer = torch.optim.AdamW(groups)
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
 
         # time.sleep(5)
         image, labels = train_batch
-
-        outputs = self(image)
+        inputs = self.processor(images=image, return_tensors="pt", do_rescale=False)
+        inputs["pixel_values"] = inputs["pixel_values"].cuda()
+        # print(inputs["pixel_values"].shape)
+        outputs = self(inputs)
         # print(outputs)
         loss = F.binary_cross_entropy_with_logits(outputs, labels)
 
@@ -122,7 +145,10 @@ class GameCartridgeDiscriminator(pl.LightningModule):
     def validation_step(self, val_batch, idx):
         image, labels = val_batch
 
-        outputs = self(image)
+        inputs = self.processor(images=image, return_tensors="pt")
+        inputs["pixel_values"] = inputs["pixel_values"].cuda()
+
+        outputs = self(inputs)
 
         threshold = 0.5
         predicted_probs = torch.sigmoid(outputs)
@@ -146,22 +172,20 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         image, labels = test_batch
         # print(image.shape)
         # time.sleep(100)
-        # inputs = self.processor(images=image, return_tensors="pt")
-        # inputs["pixel_values"] = inputs["pixel_values"].cuda()
+        inputs = self.processor(images=image, return_tensors="pt")
+        inputs["pixel_values"] = inputs["pixel_values"].cuda()
 
-        outputs = self(image)
+        outputs = self(inputs)
         threshold = 0.5
         predicted_probs = torch.sigmoid(outputs)
         y_pred = (predicted_probs > threshold).float()
-        # self.y_pred = torch.cat((self.y_pred, y_pred), dim=0).detach()
+        self.y_pred = torch.cat((self.y_pred, y_pred), dim=0).detach()
 
-        # self.test_labels = torch.cat((self.test_labels, labels), dim=0).detach()
+        self.test_labels = torch.cat((self.test_labels, labels), dim=0).detach()
         loss = F.binary_cross_entropy_with_logits(outputs, labels)
         self.test_f1(y_pred, labels)
         self.test_accuracy(y_pred, labels)
-        # print(y_pred.shape)
-        # time.sleep(10)
-        self.conf_mat.update(y_pred.to(torch.int64), labels.to(torch.int64))
+
         self.log_dict(
             {
                 "test_loss": loss,
@@ -175,26 +199,21 @@ class GameCartridgeDiscriminator(pl.LightningModule):
             enable_graph=False,
         )
 
-    def on_test_end(self) -> None:
-        # plot_confusion_matrix(
-        #     self.test_labels.cpu().numpy(),
-        #     self.y_pred.cpu().numpy(),
-        #     "Car action",
-        #     0,
-        #     str(utils.ROOT_FOOLDER) + "/Saves/conf_mat/",
-        #     False,
-        #     True,
-        #     self.action_names,
-        #     self.action_labels,
-        #     cf_matrix_filename=self.cf_matrix_filename,
-        # )
-        # self.conf_mat(self.y_pred, self.test_labels)
-        fig_, ax_ = self.conf_mat.plot()
-
-        # Display the plot
-        plt.show()
-        del self.y_pred
-        del self.test_labels
+    # def on_test_end(self) -> None:
+    #     plot_confusion_matrix(
+    #         self.test_labels.cpu().numpy(),
+    #         self.y_pred.cpu().numpy(),
+    #         "Car action",
+    #         0,
+    #         str(utils.ROOT_FOOLDER) + "/Saves/conf_mat/",
+    #         False,
+    #         True,
+    #         self.action_names,
+    #         self.action_labels,
+    #         cf_matrix_filename=self.cf_matrix_filename,
+    #     )
+    #     del self.y_pred
+    #     del self.test_labels
 
     def predict(self, to_predict):
         transform = transforms.Compose(

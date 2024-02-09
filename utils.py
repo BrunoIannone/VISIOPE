@@ -7,7 +7,7 @@ from pathlib import Path
 import csv
 import time
 from PIL import Image
-
+from tqdm import tqdm
 
 PATH = Path(os.path.dirname(__file__))
 STACKED_PATH = PATH / "Stacked Data"
@@ -17,10 +17,10 @@ DATA_PATH = PATH / "Data"
 # TEST_PATH = PATH / ROBO_PATH / "test"
 MODEL_NAME = "google/vit-base-patch16-224"
 LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"
-BATCH_SIZE = 1
+BATCH_SIZE = 32
 CKPT_SAVE_DIR_NAME = PATH / "Saves/ckpt/"
-NUM_EPOCHS = [100]
-NUM_WORKERS = 0
+NUM_EPOCHS = [1]
+NUM_WORKERS = 4
 
 
 FC_LR = [1e-3]  # , 1e-4, 1e-5]
@@ -133,7 +133,7 @@ def stack_and_resize_images(
 
 def stack_and_resize_images2(image_list, output_path, resize_dimensions=(300, 300)):
     i = 0
-    for image_tuple in image_list:
+    for image_tuple in tqdm(image_list, desc="Stacking progress"):
         try:
             # Load images
             image1 = Image.open(image_tuple[0])
@@ -188,7 +188,6 @@ def build_couples(dir):
 
 
     """
-    # Get a list of all items (files and subfolders) in the root folder
     res = []
     for console_folder in os.listdir(dir):
         for cart_image in os.listdir(dir / console_folder):

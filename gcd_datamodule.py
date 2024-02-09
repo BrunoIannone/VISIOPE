@@ -8,7 +8,7 @@ from data_processor import DataProcessor
 class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
     """Datamodule for game cartridge discriminator dataset."""
 
-    def __init__(self, training_path, test_path, val_path):
+    def __init__(self, samples_path):
         """Init function for game cartridge discriminator datamodule
 
         Args:
@@ -18,14 +18,10 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
         """
         super().__init__()
 
-        self.training_path = training_path
-        self.test_path = test_path
-        self.val_path = val_path
+        self.samples_path = samples_path
 
     def setup(self, stage: str):
-        data_processor = DataProcessor(
-            self.training_path, self.test_path, self.val_path
-        )
+        data_processor = DataProcessor(self.samples_path, 0.3, 0)
         if stage == "fit":
             self.train_dataset = gcd_dataset.GameCartridgeDiscriminatorDataset(
                 list(zip(data_processor.x_train, data_processor.y_train))
@@ -41,7 +37,7 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
 
         if stage == "test":
             self.test_dataset = gcd_dataset.GameCartridgeDiscriminatorDataset(
-                list(zip(data_processor.test_samples, data_processor.test_labels))
+                list(zip(data_processor.x_test, data_processor.y_test))
             )
 
     def train_dataloader(self):

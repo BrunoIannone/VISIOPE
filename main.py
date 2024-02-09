@@ -54,14 +54,12 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
 
     filename = str(fc_dropout) + ", " + str(cnn_wd) + "model2_with_crop"
     print(filename)
-    if filename + ".ckpt" in os.listdir(utils.CKPT_SAVE_DIR_NAME):
-        print(colored("CKPT already found, skipping", "red"))
-        continue
+    # if filename + ".ckpt" in os.listdir(utils.CKPT_SAVE_DIR_NAME):
+    #     print(colored("CKPT already found, skipping", "red"))
+    #     continue
 
     print(colored("Built data", "green"))
-    gbc_datamodule = GameCartridgeDiscriminatorDatamodule(
-        utils.PATH / "train.csv", utils.PATH / "test.csv", utils.PATH / "val.csv"
-    )
+    gbc_datamodule = GameCartridgeDiscriminatorDatamodule(utils.PATH / "samples.csv")
 
     logger = TensorBoardLogger(save_dir=str(utils.LOG_SAVE_DIR_NAME), name=filename)
     # profiler = PyTorchProfiler(on_trace_ready = torch.profiler.tensorboard_trace_handler("/home/bruno/Desktop/ML_EX2/Saves/tb_logs/profiler0"),trace_memory = True)
@@ -91,21 +89,21 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
         5, None, None, fc_lr, cnn_lr, fc_wd, cnn_wd, fc_dropout, cf_matrix_filename=""
     )
 
-    print(colored("Starting training...", "green"))
-    try:
-        trainer.fit(gbc_model, datamodule=gbc_datamodule)
+    # print(colored("Starting training...", "green"))
+    # try:
+    #     trainer.fit(gbc_model, datamodule=gbc_datamodule)
 
-    except torch.cuda.OutOfMemoryError as e:
-        print((e, colored("Cuda Out of memory detected, skipping", "red")))
-        with open("oom.txt ", "a") as f:
-            f.write("Cuda" + filename + "\n")
-            f.close()
-        del gbc_datamodule
-        del trainer
-        del logger
-        del gbc_model
-        collected = gc.collect()
-        continue
+    # except torch.cuda.OutOfMemoryError as e:
+    #     print((e, colored("Cuda Out of memory detected, skipping", "red")))
+    #     with open("oom.txt ", "a") as f:
+    #         f.write("Cuda" + filename + "\n")
+    #         f.close()
+    #     del gbc_datamodule
+    #     del trainer
+    #     del logger
+    #     del gbc_model
+    #     collected = gc.collect()
+    #     continue
 
     print(colored("Starting testing...", "green"))
 

@@ -8,12 +8,7 @@ class DataProcessor:
     Class that implements some methods for data processing
     """
 
-    def __init__(
-        self,
-        train_data_path: str,
-        test_data_path: str,
-        val_data_path: str,
-    ) -> None:
+    def __init__(self, samples_path: str, kept_size: float, random_state: int) -> None:
         """Data Processor init function.
 
         Args:
@@ -23,26 +18,19 @@ class DataProcessor:
             random_state (int): seed for random operations
         """
 
-        self.train_data = load_data(train_data_path)
-        if self.train_data is None:
-            raise ValueError("Training data is None")
+        self.samples = load_data(samples_path)
 
-        self.test_data = load_data(test_data_path)
-        if self.test_data is None:
-            raise ValueError("Test data is None")
-
-        self.val_data = load_data(val_data_path)
-        if self.val_data is None:
-            raise ValueError("Val data is None")
+        if self.samples is None:
+            raise ValueError("No samples loaded")
 
         (
             self.x_train,
             self.y_train,
             self.x_eval,
             self.y_eval,
-            self.test_samples,
-            self.test_labels,
-        ) = self._data_load_and_process_data()
+            self.x_test,
+            self.y_test,
+        ) = self._data_load_and_process_data(kept_size, random_state)
 
         self.labels_name = self._extract_labels()
 
@@ -79,7 +67,7 @@ class DataProcessor:
 
         return sorted(labels_set)
 
-    def _data_load_and_process_data(self):
+    def _data_load_and_process_data(self, kept_size: float, random_state: int):
         """
 
         Process training and test data.
@@ -97,25 +85,38 @@ class DataProcessor:
 
         """
 
-        x_train = self.train_data[0]
-        y_train = self.train_data[1]
+        # x_train = self.train_data[0]
+        # y_train = self.train_data[1]
 
-        if y_train is None:
-            raise ValueError("train_labels is None, wrong file?")
-        if x_train.shape[0] != x_train.shape[0]:
-            raise ValueError("train_samples and train_labels dimension mismatch")
+        # if y_train is None:
+        #     raise ValueError("train_labels is None, wrong file?")
+        # if x_train.shape[0] != x_train.shape[0]:
+        #     raise ValueError("train_samples and train_labels dimension mismatch")
 
-        test_samples = self.test_data[0]
-        test_labels = self.test_data[1]
+        # test_samples = self.test_data[0]
+        # test_labels = self.test_data[1]
 
-        x_eval = self.val_data[0]
-        y_eval = self.val_data[1]
+        # x_eval = self.val_data[0]
+        # y_eval = self.val_data[1]
+
+        x_train, x_kept, y_train, y_kept = train_test_split(
+            self.samples[0],
+            self.samples[1],
+            test_size=kept_size,
+            random_state=random_state,
+        )
+        x_test, x_eval, y_test, y_eval = train_test_split(
+            x_kept,
+            y_kept,
+            test_size=kept_size / 2,
+            random_state=random_state,
+        )
 
         return (
             x_train,
             y_train,
             x_eval,
             y_eval,
-            test_samples,
-            test_labels,
+            x_test,
+            y_test,
         )

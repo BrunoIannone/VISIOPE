@@ -6,6 +6,9 @@ from typing import List
 import time
 import os
 from torchvision.transforms import v2
+from torchvision import transforms
+from PIL import Image
+
 import matplotlib.pyplot as plt
 import cv2
 import utils
@@ -65,10 +68,21 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         target_size = (2000, 2000)
 
         # convert index-th sample senses in indices
-        resize_transform = v2.Compose(
+        # resize_transform = v2.Compose(
+        #     [
+        #         v2.Resize(target_size, antialias=True),
+        #         v2.ToDtype(torch.float32, scale=True),
+        #     ]
+        # )
+        resize_transform = transforms.Compose(
             [
-                v2.Resize(target_size, antialias=True),
-                v2.ToDtype(torch.float32, scale=True),
+                transforms.ToPILImage(),
+                transforms.Resize(256, antialias=True),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
             ]
         )
         image = resize_transform(read_image(self.samples[index][0]))
