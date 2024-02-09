@@ -7,11 +7,11 @@ from pathlib import Path
 import csv
 
 PATH = Path(os.path.dirname(__file__))
-STACKED_PATH = PATH / "Stacked"
+STACKED_PATH = PATH / "Stacked Data"
 DATA_PATH = os.path.join(PATH, "Data")
 ROBO_PATH = PATH / "ROBO_DATA"
 TRAINING_PATH = PATH / ROBO_PATH / "train"
-VALID_PATH = PATH / ROBO_PATH / "valid"
+VAL_PATH = PATH / ROBO_PATH / "valid"
 TEST_PATH = PATH / ROBO_PATH / "test"
 MODEL_NAME = "google/vit-base-patch16-224"
 LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"

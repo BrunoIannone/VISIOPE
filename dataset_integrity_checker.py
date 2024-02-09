@@ -226,8 +226,8 @@ class DatasetIntegrityChecker:
         return True
 
 
-# root_folder = Path(DATA_PATH)
+root_folder = Path(DATA_PATH)
 
-# sanity_checker = DatasetIntegrityChecker(root_folder)
+sanity_checker = DatasetIntegrityChecker(root_folder)
 # sanity_checker.rename_images("fronte", "retro")
-# sanity_checker.dataset_sanity_check()
+sanity_checker.dataset_sanity_check()

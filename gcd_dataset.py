@@ -26,13 +26,24 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         """
 
         self.samples = samples
+        # print(self.samples)
+        # self.labels_to_idx = {
+        #     "DS true": 0,
+        #     "DS false": 1,
+        #     "GBA true": 2,
+        #     "GBA false": 3,
+        #     "GB true": 4,
+        #     "GB false": 5,
+        # }
         self.labels_to_idx = {
-            "DS true": 0,
-            "DS false": 1,
-            "GBA true": 2,
-            "GBA false": 3,
-            "GB true": 4,
-            "GB false": 5,
+            "DS": 0,
+            "GBA": 1,
+            "GB": 2,
+        }
+
+        self.originality_labels_to_idx = {
+            "true": 3,
+            "false": 4,
         }
 
     def __len__(self):
@@ -64,7 +75,21 @@ class GameCartridgeDiscriminatorDataset(Dataset):
             ]
         )
         image = resize_transform(read_image(self.samples[index][0]))
-        label = self.labels_to_idx[self.samples[index][1]]
+        label = self.samples[index][1]
+        label = label.split(" ")
         # print(label)
-        # print(image.shape)
-        return image, label
+        cartridge = self.labels_to_idx[label[0]]
+        label_binary = [
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+        label_binary[cartridge] = 1
+        value = self.originality_labels_to_idx[label[1]]
+
+        label_binary[value] = 1
+
+        # print(torch.tensor(label_binary, dtype=torch.float32))
+        return image, torch.tensor(label_binary, dtype=torch.float32)

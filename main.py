@@ -60,7 +60,7 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
 
     print(colored("Built data", "green"))
     gbc_datamodule = GameCartridgeDiscriminatorDatamodule(
-        utils.PATH / "train.csv", utils.PATH / "test.csv"
+        utils.PATH / "train.csv", utils.PATH / "test.csv", utils.PATH / "val.csv"
     )
 
     logger = TensorBoardLogger(save_dir=str(utils.LOG_SAVE_DIR_NAME), name=filename)
@@ -107,11 +107,9 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
         collected = gc.collect()
         continue
 
-    # print(colored("Starting testing...", "green"))
+    print(colored("Starting testing...", "green"))
 
-    # trainer.test(
-    #     gbc_model, datamodule=gbc_datamodule
-    # )  # ,ckpt_path="best")
+    trainer.test(gbc_model, datamodule=gbc_datamodule)  # ,ckpt_path="best")
 
     del gbc_datamodule
     del trainer

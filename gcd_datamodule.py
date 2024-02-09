@@ -8,7 +8,7 @@ from data_processor import DataProcessor
 class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
     """Datamodule for car action dataset."""
 
-    def __init__(self, training_path, test_path):
+    def __init__(self, training_path, test_path, val_path):
         """Init function for car action datamodule
 
         Args:
@@ -20,9 +20,12 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
 
         self.training_path = training_path
         self.test_path = test_path
+        self.val_path = val_path
 
     def setup(self, stage: str):
-        data_processor = DataProcessor(self.training_path, self.test_path, 0.3, 0)
+        data_processor = DataProcessor(
+            self.training_path, self.test_path, self.val_path
+        )
         if stage == "fit":
             self.train_dataset = gcd_dataset.GameCartridgeDiscriminatorDataset(
                 list(zip(data_processor.x_train, data_processor.y_train))
