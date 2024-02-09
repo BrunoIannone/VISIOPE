@@ -1,6 +1,5 @@
 from torch.utils.data import Dataset
 
-# import stud.transformer_utils as transformer_utils
 from torchvision.io import read_image
 from termcolor import colored
 from typing import List
@@ -15,10 +14,10 @@ import torch
 
 
 class GameCartridgeDiscriminatorDataset(Dataset):
-    """Car action dataset class"""
+    """Game cartridge dataset class"""
 
     def __init__(self, samples: List[tuple]):
-        """Constructor for car action dataset
+        """Constructor for cartridge dataset dataset
 
         Args:
             samples (List[tuple]): List of tuples (image_path, action_label)
@@ -69,15 +68,13 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         resize_transform = v2.Compose(
             [
                 v2.Resize(target_size, antialias=True),
-                v2.ToDtype(
-                    torch.float32, scale=True
-                ),  # If you want to convert the PIL Image to a PyTorch tensor
+                v2.ToDtype(torch.float32, scale=True),
             ]
         )
         image = resize_transform(read_image(self.samples[index][0]))
         label = self.samples[index][1]
         label = label.split(" ")
-        # print(label)
+
         cartridge = self.labels_to_idx[label[0]]
         label_binary = [
             0,

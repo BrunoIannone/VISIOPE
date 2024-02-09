@@ -17,13 +17,11 @@ from dataset_handler import DatasetHandler
 # print(dataset_handler.training_couples)
 # show_dataset(dataset_handler.training_couples)
 dest_folder = utils.STACKED_PATH
-dataset_handler = DatasetHandler(
-    utils.DATA_PATH, utils.TRAINING_PATH, utils.VAL_PATH, utils.TEST_PATH
-)
-train_samples = dataset_handler._build_couples()
+dataset_handler = DatasetHandler(utils.DATA_PATH)
+# train_samples = dataset_handler.samples
 # print(train_samples)
 # dataset_handler.perform_sanity_check()
-utils.stack_and_resize_images(
-    dataset_handler.training_samples, utils.STACKED_PATH, (2000, 2000)
+utils.stack_and_resize_images2(
+    dataset_handler.samples, utils.STACKED_PATH, (2000, 2000)
 )
 # robo = Path(ROBO_PATH + "/train")

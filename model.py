@@ -23,9 +23,9 @@ from transformers import ViTImageProcessor, ViTForImageClassification
 class GameCartridgeDiscriminator(pl.LightningModule):
     def __init__(
         self,
-        number_actions: int,
-        action_names: List[str] = None,
-        action_labels: List[int] = None,
+        num_labels: int,
+        console_names: List[str] = None,
+        console_labels: List[int] = None,
         fc_lr: float = 0.0,
         cnn_lr: float = 0.0,
         fc_wd: float = 0.0,
@@ -36,9 +36,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         """Car action model init function
 
         Args:
-            number_actions (int): Number of actions
-            action_names(List[str]): Action names list of string. Optional
-            action_labels(List[int]): List of action labels in integer values
+            num_labels (int): Number of chosen consoles
+            console_names(List[str]): Console names, list of string. Optional
+            console_labels(List[int]): List of console labels in integer values
             fc_lr (float, optional): Linear layer learning rate. Defaults to 0.0.
             cnn_lr (float, optional): CNN learning rate. Defaults to 0.0.
             fc_wd (float, optional): Linear layer weight decay. Defaults to 0.0.
@@ -47,9 +47,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
             cnn_dropout (float, optional): CNN dropout. Defaults to 0.0.
         """
         super().__init__()
-        self.number_actions = number_actions
-        self.action_names = action_names
-        self.action_labels = action_labels
+        self.num_labels = num_labels
+        self.console_names = console_names
+        self.console_labels = console_labels
         self.cf_matrix_filename = cf_matrix_filename
         self.processor = ViTImageProcessor.from_pretrained(
             "google/vit-base-patch16-224",
@@ -75,14 +75,18 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         self.cnn_wd = cnn_wd
 
         self.val_f1 = torchmetrics.F1Score(
-            task="multilabel", num_labels=5, average="macro"
+            task="multilabel", num_labels=self.num_labels, average="macro"
         )
-        self.val_accuracy = torchmetrics.Accuracy(task="multilabel", num_labels=5)
+        self.val_accuracy = torchmetrics.Accuracy(
+            task="multilabel", num_labels=self.num_labels
+        )
 
         self.test_f1 = torchmetrics.F1Score(
-            task="multilabel", num_labels=5, average="macro"
+            task="multilabel", num_labels=self.num_labels, average="macro"
         )
-        self.test_accuracy = torchmetrics.Accuracy(task="multilabel", num_labels=5)
+        self.test_accuracy = torchmetrics.Accuracy(
+            task="multilabel", num_labels=self.num_labels
+        )
         self.y_pred = torch.Tensor().cuda().detach()
         self.test_labels = torch.Tensor().cuda().detach()
 
@@ -118,7 +122,7 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
-        # print("PENEEEEEEEEEEEE")
+
         # time.sleep(5)
         image, labels = train_batch
         inputs = self.processor(images=image, return_tensors="pt")

@@ -5,14 +5,16 @@ from typing import List
 import warnings
 from pathlib import Path
 import csv
+import time
+from PIL import Image
+
 
 PATH = Path(os.path.dirname(__file__))
 STACKED_PATH = PATH / "Stacked Data"
 DATA_PATH = PATH / "Data"
-ROBO_PATH = PATH / "ROBO_DATA"
-TRAINING_PATH = PATH / ROBO_PATH / "train"
-VAL_PATH = PATH / ROBO_PATH / "valid"
-TEST_PATH = PATH / ROBO_PATH / "test"
+# TRAINING_PATH = PATH / ROBO_PATH / "train"
+# VAL_PATH = PATH / ROBO_PATH / "valid"
+# TEST_PATH = PATH / ROBO_PATH / "test"
 MODEL_NAME = "google/vit-base-patch16-224"
 LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"
 BATCH_SIZE = 1
@@ -68,19 +70,15 @@ def show_dataset(image_couples: List[tuple]):
     print(colored("Showed last image", "green"))
 
 
-from PIL import Image
-
-
 def fast_show(image):
     cv2.imshow("Image", image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
-import time
-
-
-def stack_and_resize_images(image_list, output_path, resize_dimensions=(300, 300)):
+def stack_and_resize_images(
+    image_list, output_path, resize_dimensions=(300, 300)
+):  # deprecated
     i = 0
     for image_tuple in image_list:
         # print([image_tuple])
@@ -133,12 +131,57 @@ def stack_and_resize_images(image_list, output_path, resize_dimensions=(300, 300
             print(f"Error: {e}")
 
 
-# # Example usage:
-# image_paths_list = [("image1_path.jpg", "image2_path.jpg")]
-# output_path = "output_stacked_image.jpg"
-# stack_and_resize_images(image_paths_list[0], output_path)
+def stack_and_resize_images2(image_list, output_path, resize_dimensions=(300, 300)):
+    i = 0
+    for image_tuple in image_list:
+        try:
+            # Load images
+            image1 = Image.open(image_tuple[0])
+            image2 = Image.open(image_tuple[1])
+
+            # Resize images
+            width1, height1 = image1.size
+            width2, height2 = image2.size
+
+            # Calculate new heights maintaining aspect ratio
+            new_height = max(height1, height2)
+            new_width1 = int(width1 * (new_height / height1))
+            new_width2 = int(width2 * (new_height / height2))
+
+            image1 = image1.resize((new_width1, new_height))
+            image2 = image2.resize((new_width2, new_height))
+
+            # Get the size of the stacked image
+            new_width = new_width1 + new_width2
+            new_height = max(new_height, new_height)
+
+            # Create a new image with the calculated size
+            stacked_image = Image.new("RGB", (new_width, new_height))
+
+            # Paste the resized images onto the new image
+            stacked_image.paste(image1, (0, 0))
+            stacked_image.paste(image2, (new_width1, 0))
+
+            # Save the stacked and resized image to the specified output path
+            stacked_image.save(
+                os.path.join(
+                    output_path
+                    / str(
+                        image_tuple[2]
+                        + " "
+                        + image_tuple[0].split("$")[2].split(".")[0]
+                    ),
+                    str(i) + "$" + image_tuple[0].split("$")[2],
+                ),
+            )
+            i += 1
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+
 def build_couples(dir):
-    """Build a csv with row sample_path, label (folder name)
+    """Build a csv having rows with the following structure: sample_path, label (taken from folder name)
 
     Args:
         dir (str): Dataset folder
@@ -147,18 +190,16 @@ def build_couples(dir):
     """
     # Get a list of all items (files and subfolders) in the root folder
     res = []
-    for action_folder in os.listdir(dir):
-        # print(colored(action_folder, "red"))
-        for action_image in os.listdir(dir / action_folder):
-            # print(image_folder)
-            res.append((dir / action_folder / action_image, action_folder))
+    for console_folder in os.listdir(dir):
+        for cart_image in os.listdir(dir / console_folder):
+            res.append((dir / console_folder / cart_image, console_folder))
 
-    csv_file_path = "predictions2.csv"
+    csv_file_path = "couples.csv"
     # Open the CSV file in write mode
     with open(csv_file_path, "w", newline="") as csv_file:
         # Create a CSV writer object
         csv_writer = csv.writer(csv_file)
-        # Write the header if needed (optional)
+        # Write the header
         csv_writer.writerow(["Image", "Label"])
         for elem in res:
             # Write the predictions to the CSV file

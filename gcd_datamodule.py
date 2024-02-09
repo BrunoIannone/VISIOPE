@@ -6,10 +6,10 @@ from data_processor import DataProcessor
 
 
 class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
-    """Datamodule for car action dataset."""
+    """Datamodule for game cartridge discriminator dataset."""
 
     def __init__(self, training_path, test_path, val_path):
-        """Init function for car action datamodule
+        """Init function for game cartridge discriminator datamodule
 
         Args:
             training_data (List[tuple]): List of tuple (image,label)
