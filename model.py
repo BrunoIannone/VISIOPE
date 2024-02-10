@@ -83,7 +83,18 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-
+        groups = [
+            {
+                "params": self.model.fc.parameters(),
+                "lr": self.fc_lr,
+                "weight_decay": self.fc_wd,
+            },
+            {
+                "params": self.model.parameters(),
+                "lr": self.cnn_lr,
+                "weight_decay": self.cnn_wd,
+            },
+        ]
         optimizer = torch.optim.AdamW(self.model.parameters())
         return optimizer
 
