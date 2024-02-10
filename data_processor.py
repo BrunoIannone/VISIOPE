@@ -1,6 +1,7 @@
 from load_data import load_data
 from sklearn.model_selection import train_test_split
 import time
+import random
 
 
 class DataProcessor:
@@ -111,6 +112,17 @@ class DataProcessor:
             test_size=kept_size / 2,
             random_state=random_state,
         )
+
+        # SCOMMENTA PER CONTARE LABEL A SCELTA
+        # cnt = 0
+        # for elem in x_test:
+
+        #     elem = elem.split("/")
+        #     # print(elem[6].split(" ")[0])
+        #     if elem[6].split(" ")[1] == "false":
+        #         # print("SI")
+        #         cnt += 1
+        # print(cnt)
 
         return (
             x_train,

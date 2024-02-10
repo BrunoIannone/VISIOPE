@@ -17,6 +17,7 @@ from torchvision import transforms, models
 import numpy as np
 import datetime
 from transformers import ViTImageProcessor, ViTForImageClassification
+import os
 
 # from plot_utils import plot_confusion_matrix
 
@@ -25,14 +26,13 @@ class GameCartridgeDiscriminator(pl.LightningModule):
     def __init__(
         self,
         num_labels: int,
-        console_names: List[str] = None,
-        console_labels: List[int] = None,
+        label_names: List[str] = None,
         fc_lr: float = 0.0,
         cnn_lr: float = 0.0,
         fc_wd: float = 0.0,
         cnn_wd: float = 0.0,
-        fc_dropout: float = 0.0,
         cf_matrix_filename: str = "",
+        plot_save_path: str = "",
     ) -> None:
         """Car action model init function
 
@@ -49,17 +49,12 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         """
         super().__init__()
         self.num_labels = num_labels
-        self.console_names = console_names
-        self.console_labels = console_labels
+        self.label_names = label_names
+
         self.cf_matrix_filename = cf_matrix_filename
 
-        self.model = models.resnet18(pretrained=True)
-        self.flatten = nn.Flatten()
+        self.model = models.resnet18(weights="ResNet18_Weights.DEFAULT")
         self.model.fc = torch.nn.Linear(self.model.fc.in_features, 5)
-        # Fully connected layers for classification
-        # self.fc1 = nn.Linear(768, 5)
-
-        self.fc_dropout = nn.Dropout(fc_dropout)
 
         self.fc_lr = fc_lr
         self.fc_wd = fc_wd
@@ -80,19 +75,11 @@ class GameCartridgeDiscriminator(pl.LightningModule):
             task="multilabel", num_labels=self.num_labels
         )
         self.conf_mat = MultilabelConfusionMatrix(num_labels=5)
-        self.y_pred = torch.Tensor().cuda().detach()
-        self.test_labels = torch.Tensor().cuda().detach()
 
         self.save_hyperparameters()
 
     def forward(self, x):
         x = self.model(x)
-        # Apply dropout if needed
-        # x = self.fc_dropout(x)
-
-        # Pass through the linear layer
-        # logits = self.fc1(x)
-        # print(logits)
         return x
 
     def configure_optimizers(self):
@@ -102,11 +89,10 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
 
-        # time.sleep(5)
         image, labels = train_batch
 
         outputs = self(image)
-        # print(outputs)
+
         loss = F.binary_cross_entropy_with_logits(outputs, labels)
 
         self.log_dict(
@@ -126,10 +112,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
         threshold = 0.5
         predicted_probs = torch.sigmoid(outputs)
-        # print(predicted_probs)
+
         y_pred = (predicted_probs > threshold).float()
-        # print(y_pred)
-        # time.sleep(10)
+
         loss = F.binary_cross_entropy_with_logits(outputs, labels)
         self.val_f1(y_pred, labels)
         self.val_accuracy(y_pred, labels)
@@ -144,23 +129,16 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
     def test_step(self, test_batch):
         image, labels = test_batch
-        # print(image.shape)
-        # time.sleep(100)
-        # inputs = self.processor(images=image, return_tensors="pt")
-        # inputs["pixel_values"] = inputs["pixel_values"].cuda()
 
         outputs = self(image)
         threshold = 0.5
         predicted_probs = torch.sigmoid(outputs)
         y_pred = (predicted_probs > threshold).float()
-        # self.y_pred = torch.cat((self.y_pred, y_pred), dim=0).detach()
 
-        # self.test_labels = torch.cat((self.test_labels, labels), dim=0).detach()
         loss = F.binary_cross_entropy_with_logits(outputs, labels)
         self.test_f1(y_pred, labels)
         self.test_accuracy(y_pred, labels)
-        # print(y_pred.shape)
-        # time.sleep(10)
+
         self.conf_mat.update(y_pred.to(torch.int64), labels.to(torch.int64))
         self.log_dict(
             {
@@ -176,25 +154,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         )
 
     def on_test_end(self) -> None:
-        # plot_confusion_matrix(
-        #     self.test_labels.cpu().numpy(),
-        #     self.y_pred.cpu().numpy(),
-        #     "Car action",
-        #     0,
-        #     str(utils.ROOT_FOOLDER) + "/Saves/conf_mat/",
-        #     False,
-        #     True,
-        #     self.action_names,
-        #     self.action_labels,
-        #     cf_matrix_filename=self.cf_matrix_filename,
-        # )
-        # self.conf_mat(self.y_pred, self.test_labels)
-        fig_, ax_ = self.conf_mat.plot()
 
-        # Display the plot
-        plt.show()
-        del self.y_pred
-        del self.test_labels
+        fig_, ax_ = self.conf_mat.plot(labels=self.label_names)
+        utils.save_conf_mat(fig_, self.cf_matrix_filename)
 
     def predict(self, to_predict):
         transform = transforms.Compose(

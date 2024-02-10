@@ -21,7 +21,9 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
         self.samples_path = samples_path
 
     def setup(self, stage: str):
-        data_processor = DataProcessor(self.samples_path, 0.3, 0)
+        data_processor = DataProcessor(
+            self.samples_path, utils.TEST_SIZE, utils.RANDOM_SEED
+        )
         if stage == "fit":
             self.train_dataset = gcd_dataset.GameCartridgeDiscriminatorDataset(
                 list(zip(data_processor.x_train, data_processor.y_train))
@@ -45,7 +47,7 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
             self.train_dataset,
             batch_size=utils.BATCH_SIZE,
             num_workers=utils.NUM_WORKERS,
-            shuffle=True,
+            shuffle=False,
             # collate_fn=utils.collate_fn
         )
 

@@ -8,28 +8,33 @@ import csv
 import time
 from PIL import Image
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import datetime
 
+RANDOM_SEED = 0
+
+############ DIRECTORIES ############
 PATH = Path(os.path.dirname(__file__))
 STACKED_PATH = PATH / "Stacked Data"
 DATA_PATH = PATH / "Data"
-# TRAINING_PATH = PATH / ROBO_PATH / "train"
-# VAL_PATH = PATH / ROBO_PATH / "valid"
-# TEST_PATH = PATH / ROBO_PATH / "test"
-MODEL_NAME = "google/vit-base-patch16-224"
 LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"
-BATCH_SIZE = 32
 CKPT_SAVE_DIR_NAME = PATH / "Saves/ckpt/"
+PLOT_SAVE_PATH = PATH / "Saves/conf_mat/"
+#####################################
+
+############ HYPERPARAMETERS ############
 NUM_EPOCHS = [1]
+BATCH_SIZE = 32
 NUM_WORKERS = 4
-
-
+TEST_SIZE = 0.3
 FC_LR = [1e-3]  # , 1e-4, 1e-5]
-CNN_LR = [0]  # , 1e-4]#, 1e-5]
-
-CNN_WD = [0.001]  # ,0.01,0.1]
 FC_WD = [0]  # ,0.01,0.1]
+CNN_LR = [0]  # , 1e-4]#, 1e-5]
+CNN_WD = [0.001]  # ,0.01,0.1]
+#########################################
 
-FC_DROPOUT = [0.4]
+
+# MODEL_NAME = "google/vit-base-patch16-224"
 
 
 def show_dataset(image_couples: List[tuple]):
@@ -205,3 +210,21 @@ def build_couples(dir):
             csv_writer.writerow((str(elem[0]), elem[1]))
 
     print(f"Train data been written to {csv_file_path}.")
+
+
+def save_conf_mat(fig_, cf_matrix_filename):
+    fig_.set_size_inches(1920 / 100, 1080 / 100)
+    if cf_matrix_filename != "":
+        plt.savefig(
+            os.path.join(
+                PLOT_SAVE_PATH,
+                "confusion_matrix"
+                + cf_matrix_filename
+                + str(datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))
+                + ".png",
+            ),
+            dpi=200,
+        )
+
+        plt.clf()
+        plt.close()
