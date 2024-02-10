@@ -56,7 +56,7 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
     logger = TensorBoardLogger(save_dir=str(utils.LOG_SAVE_DIR_NAME), name=filename)
 
     trainer = pl.Trainer(
-        log_every_n_steps=20,
+        log_every_n_steps=5,
         max_epochs=num_epochs,
         callbacks=[
             EarlyStopping(monitor="val_loss", patience=3, mode="min"),
