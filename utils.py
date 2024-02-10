@@ -23,7 +23,7 @@ PLOT_SAVE_PATH = PATH / "Saves/conf_mat/"
 #####################################
 
 ############ HYPERPARAMETERS ############
-NUM_EPOCHS = [1]
+NUM_EPOCHS = [100]
 BATCH_SIZE = 32
 NUM_WORKERS = 4
 TEST_SIZE = 0.3

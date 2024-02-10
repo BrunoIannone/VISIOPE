@@ -28,15 +28,7 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         """
 
         self.samples = samples
-        # print(self.samples)
-        # self.labels_to_idx = {
-        #     "DS true": 0,
-        #     "DS false": 1,
-        #     "GBA true": 2,
-        #     "GBA false": 3,
-        #     "GB true": 4,
-        #     "GB false": 5,
-        # }
+
         self.labels_to_idx = {
             "DS": 0,
             "GBA": 1,
@@ -65,15 +57,7 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         Returns:
             tuple: (image, labels) open image_path and return the tuple (image,label) related to the index-th element
         """
-        target_size = (2000, 2000)
 
-        # convert index-th sample senses in indices
-        # resize_transform = v2.Compose(
-        #     [
-        #         v2.Resize(target_size, antialias=True),
-        #         v2.ToDtype(torch.float32, scale=True),
-        #     ]
-        # )
         resize_transform = transforms.Compose(
             [
                 transforms.ToPILImage(),
@@ -86,8 +70,18 @@ class GameCartridgeDiscriminatorDataset(Dataset):
             ]
         )
         image = resize_transform(read_image(self.samples[index][0]))
-        label = self.samples[index][1]
-        label = label.split(" ")
+        label_binary = self.build_binary_label_vector(
+            self.labels_to_idx, self.originality_labels_to_idx, index
+        )
+
+        return image, torch.tensor(label_binary, dtype=torch.float32)
+
+    def build_binary_label_vector(
+        self, labels_to_idx: dict, originality_labels_to_idx: dict, index: int
+    ):
+        label = self.samples[index][1]  # get label
+
+        label = label.split(" ")  # [console, true/false]
 
         cartridge = self.labels_to_idx[label[0]]
         label_binary = [
@@ -101,6 +95,4 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         value = self.originality_labels_to_idx[label[1]]
 
         label_binary[value] = 1
-
-        # print(torch.tensor(label_binary, dtype=torch.float32))
-        return image, torch.tensor(label_binary, dtype=torch.float32)
+        return label_binary
