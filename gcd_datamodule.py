@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader
 import gcd_dataset
 import utils
 from data_processor import DataProcessor
+import torch
 
 
 class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
@@ -47,8 +48,8 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
             self.train_dataset,
             batch_size=utils.BATCH_SIZE,
             num_workers=utils.NUM_WORKERS,
-            shuffle=False,
-            # collate_fn=utils.collate_fn
+            shuffle=True,
+            generator=torch.Generator().manual_seed(utils.RANDOM_SEED),
         )
 
     def val_dataloader(self):
@@ -57,7 +58,6 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
             batch_size=utils.BATCH_SIZE,
             num_workers=utils.NUM_WORKERS,
             shuffle=False,
-            # collate_fn=utils.collate_fn
         )
 
     def test_dataloader(self):
@@ -66,7 +66,6 @@ class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
             batch_size=utils.BATCH_SIZE,
             num_workers=utils.NUM_WORKERS,
             shuffle=False,
-            # collate_fn=utils.collate_fn
         )
 
     def teardown(self, stage: str) -> None:

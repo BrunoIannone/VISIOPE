@@ -58,27 +58,31 @@ class GameCartridgeDiscriminatorDataset(Dataset):
             tuple: (image, labels) open image_path and return the tuple (image,label) related to the index-th element
         """
 
-        resize_transform = transforms.Compose(
+        # resize_transform = transforms.Compose(
+        #     [
+        #         transforms.ToPILImage(),
+        #         transforms.Resize(224, antialias=True),
+        #         # transforms.CenterCrop(224),
+        #         transforms.ToTensor(),
+        #         transforms.Normalize(
+        #             mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+        #         ),
+        #     ]
+        # )
+        resize_transform = v2.Compose(
             [
-                transforms.ToPILImage(),
-                transforms.Resize(256, antialias=True),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
+                v2.Resize(256, antialias=True),
+                v2.CenterCrop(224),
+                v2.ToDtype(torch.float32, scale=True),
+                v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ]
         )
         image = resize_transform(read_image(self.samples[index][0]))
-        label_binary = self.build_binary_label_vector(
-            self.labels_to_idx, self.originality_labels_to_idx, index
-        )
+        label_binary = self.build_binary_label_vector(index)
 
         return image, torch.tensor(label_binary, dtype=torch.float32)
 
-    def build_binary_label_vector(
-        self, labels_to_idx: dict, originality_labels_to_idx: dict, index: int
-    ):
+    def build_binary_label_vector(self, index: int):
         label = self.samples[index][1]  # get label
 
         label = label.split(" ")  # [console, true/false]
