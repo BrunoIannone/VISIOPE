@@ -90,12 +90,18 @@ class GameCartridgeDiscriminator(pl.LightningModule):
                 "weight_decay": self.fc_wd,
             },
             {
-                "params": self.model.parameters(),
+                "params": [
+                    param
+                    for name, param in self.model.named_parameters()
+                    if "fc" not in name
+                ],
                 "lr": self.cnn_lr,
                 "weight_decay": self.cnn_wd,
             },
         ]
-        optimizer = torch.optim.AdamW(self.model.parameters())
+        # optimizer = torch.optim.AdamW(self.model.parameters())
+        optimizer = torch.optim.AdamW(groups)
+
         return optimizer
 
     def training_step(self, train_batch, batch_idx):
