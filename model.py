@@ -18,8 +18,16 @@ import numpy as np
 import datetime
 from transformers import ViTImageProcessor, ViTForImageClassification
 import os
+from torchvision.transforms import v2
+from torchvision.io import read_image
+from torchvision import transforms
+from PIL import Image
+from tqdm import tqdm
+from pathlib import Path
+from torchvision.io import read_image
 
 # from plot_utils import plot_confusion_matrix
+from dataset_handler import DatasetHandler
 
 
 class GameCartridgeDiscriminator(pl.LightningModule):
@@ -175,17 +183,87 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         fig_, ax_ = self.conf_mat.plot(labels=self.label_names)
         utils.save_conf_mat(fig_, self.cf_matrix_filename)
 
-    def predict(self, to_predict):
-        transform = transforms.Compose(
-            [
-                transforms.ToPILImage(),
-                transforms.Resize((96, 96)),
-                transforms.ToTensor(),
-            ]
-        )
-        to_predict = transform(to_predict).unsqueeze(0).cpu()
+    def predict(self, to_predict_path):
+        pred = []
+        to_predict = self._stack_and_preprocess_for_prediction(to_predict_path)
+        print(len(to_predict))
+        for image in to_predict:
 
-        p = self(to_predict)
+            resize_transform = v2.Compose(
+                [
+                    v2.ToImage(),
+                    v2.Resize(256, antialias=True),
+                    v2.CenterCrop(224),
+                    v2.ToDtype(torch.float32, scale=True),
+                    v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ]
+            )
+            image = resize_transform(image)
+            to_predict = image.unsqueeze(0).cpu()
 
-        _, action = torch.max(p, 1)
-        return int(action)
+            p = self(to_predict)
+
+            threshold = 0.5
+            predicted_probs = torch.sigmoid(p)
+            print(float(predicted_probs[0][4]))
+            falsity_check = float(predicted_probs[0][4]) > 0.4
+            print(predicted_probs)
+            y_pred = (predicted_probs > threshold).float()
+            if falsity_check:
+                y_pred[0][4] = 1
+                y_pred[0][3] = 0
+            pred.append(y_pred)
+
+        return pred
+
+    def _stack_and_preprocess_for_prediction(self, path):
+        # def stack_and_resize_images2(image_list, output_path, resize_dimensions=(300, 300)):
+        to_predict_list = []
+        dataset_handler = DatasetHandler(path, True)
+        print(dataset_handler.samples)
+        i = 0
+        for image_tuple in tqdm(dataset_handler.samples, desc="Stacking progress"):
+            try:
+                # Load images
+                image1 = Image.open(image_tuple[0])
+                image2 = Image.open(image_tuple[1])
+
+                # Resize images
+                width1, height1 = image1.size
+                width2, height2 = image2.size
+
+                # Calculate new heights maintaining aspect ratio
+                new_height = max(height1, height2)
+                new_width1 = int(width1 * (new_height / height1))
+                new_width2 = int(width2 * (new_height / height2))
+
+                image1 = image1.resize((new_width1, new_height))
+                image2 = image2.resize((new_width2, new_height))
+
+                # Get the size of the stacked image
+                new_width = new_width1 + new_width2
+                new_height = max(new_height, new_height)
+
+                # Create a new image with the calculated size
+                stacked_image = Image.new("RGB", (new_width, new_height))
+
+                # Paste the resized images onto the new image
+                stacked_image.paste(image1, (0, 0))
+                stacked_image.paste(image2, (new_width1, 0))
+                to_predict_list.append(stacked_image)
+                # Save the stacked and resized image to the specified output path
+                # stacked_image.save(
+                #     os.path.join(
+                #         output_path
+                #         / str(
+                #             image_tuple[2]
+                #             + " "
+                #             + image_tuple[0].split("$")[2].split(".")[0]
+                #         ),
+                #         str(i) + "$" + image_tuple[0].split("$")[2],
+                #     ),
+                # )
+                # i += 1
+            except Exception as e:
+                print(f"Error: {e}")
+        return to_predict_list

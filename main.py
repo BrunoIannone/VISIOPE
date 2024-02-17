@@ -43,7 +43,16 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
     cnn_wd = hyperparameter[3]
     num_epochs = hyperparameter[4]
 
-    filename = str(fc_lr) + ", " + str(cnn_lr) + ", " + str(fc_wd) + ", " + str(cnn_wd)
+    filename = (
+        str(fc_lr)
+        + ", "
+        + str(cnn_lr)
+        + ", "
+        + str(fc_wd)
+        + ", "
+        + str(cnn_wd)
+        + "resnet50"
+    )
     print(filename)
 
     if filename + ".ckpt" in os.listdir(utils.CKPT_SAVE_DIR_NAME):

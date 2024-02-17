@@ -18,18 +18,18 @@ PATH = Path(os.path.dirname(__file__))
 STACKED_PATH = PATH / "Stacked Data"
 DATA_PATH = PATH / "Data"
 LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"
-CKPT_SAVE_DIR_NAME = PATH / "Saves/ckpt/"
+CKPT_SAVE_DIR_NAME = PATH / "Saves/"
 PLOT_SAVE_PATH = PATH / "Saves/conf_mat/"
 #####################################
 
 ############ HYPERPARAMETERS ############
 NUM_EPOCHS = [100]
-BATCH_SIZE = 256
+BATCH_SIZE = 64
 NUM_WORKERS = 8
 TEST_SIZE = 0.3
 FC_LR = [1e-2, 1e-3, 1e-4]
 FC_WD = [0, 0.001, 0.01, 0.1]
-CNN_LR = [1e-4, 1e-5, 1e-6]
+CNN_LR = [1e-4, 1e-5]
 CNN_WD = [0, 0.001, 0.01, 0.1]
 #########################################
 

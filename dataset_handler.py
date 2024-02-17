@@ -12,12 +12,12 @@ import time
 class DatasetHandler:
     """Class that implements some operations for the dataset"""
 
-    def __init__(self, root_folder: Path):
+    def __init__(self, root_folder: Path, prediction: bool = False):
         """Initialize the Dataset Handler.
 
         Args:
             root_folder (Path): Dataset path.
-
+            prediction (bool): True if the model has to operate prediction. False otherwise. Default False.
 
         Attributes:
             root_folder (Path): Dataset path.
@@ -30,7 +30,10 @@ class DatasetHandler:
         """
         self.root_folder = root_folder
 
-        self.samples = self._build_couples()
+        if prediction:
+            self.samples = self._build_couples_for_prediction()
+        else:
+            self.samples = self._build_couples()
 
     def _find_matching_rear_image(self, image_path: str, console):
         """Auxiliary finction for _build_couples() that finds matching rear images for each front image.
@@ -142,3 +145,65 @@ class DatasetHandler:
     #             res.append(i + 1)
 
     #     return res
+    def _build_couples_for_prediction(self):
+        """Builds pairs of front and rear images for all consoles and image folders within the root folder.
+
+        Returns:
+            list: A list of tuples, each containing paths to matching front and rear images, along with the corresponding console object.
+                Each tuple has the following format:
+                - (str, str, console)
+                    - The full path to the front image.
+                    - The full path to the corresponding rear image.
+                    - The console object for logging or output.
+        """
+
+        res = []
+        # Explore all console sub-folders to build front/rear couples
+        for console_folder in os.listdir(self.root_folder):
+            # print(colored(console_folder, "red"))
+            for image_folder in os.listdir(self.root_folder / console_folder):
+                # print(image_folder)
+                res += self._find_matching_rear_image_for_prediction(
+                    self.root_folder / console_folder / image_folder, console_folder
+                )
+        print(colored("Couples build successfully", "green"))
+        return res
+
+    def _find_matching_rear_image_for_prediction(self, image_path: str, console):
+        """Auxiliary finction for _build_couples() that finds matching rear images for each front image.
+
+        Args:
+            image_path (str): The path to the directory containing the front and rear images.
+            console (str): The cartridge belonging console.
+
+        Raises:
+            ValueError: If the number of front and rear images is different in the specified directory.
+
+        Returns:
+            list: A list of tuples, each containing paths to matching front and rear images, along with the belonging console. (front_image_path,rear_image_path,console_name)
+
+        """
+        couples = []
+        # Take front images
+        front_images = [f for f in os.listdir(image_path) if f.startswith("front")]
+
+        # Take rear images
+        rear_images = [f for f in os.listdir(image_path) if f.startswith("rear")]
+
+        if len(front_images) != len(
+            rear_images
+        ):  # Mismatching number of front and rear images
+            raise ValueError(
+                "Number of front and rear images is different in " + str(image_path)
+            )
+        for f_image in front_images:  # Tuple building
+            headers = f_image.split("$")
+            couples.append(
+                (
+                    os.path.join(image_path, f_image),  # Front image path
+                    os.path.join(
+                        image_path, "rear$" + str(headers[1])
+                    ),  # Rear image path
+                )
+            )
+        return couples
