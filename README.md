@@ -65,7 +65,7 @@ For instance:
     *GBA
 
 
-Notice the image names that follow the following conventions {front,rear}$number${true,false}.extension where number is a unique numeric identifier for each couple. You can use the DatasetIntegrityChecker class to perform the integrity check, or the quick call in the DatasetHandler class.
+Notice the image names that follow the following conventions **{front,rear}$number${true,false}**.extension where number is a unique numeric identifier for each couple. You can use the DatasetIntegrityChecker class to perform the integrity check, or the quick call in the DatasetHandler class.
 
 2. Stacked Data
 
