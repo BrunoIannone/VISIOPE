@@ -1,18 +1,8 @@
 from torch.utils.data import Dataset
-
 from torchvision.io import read_image
-from termcolor import colored
 from typing import List
 import time
-import os
 from torchvision.transforms import v2
-from torchvision import transforms
-from PIL import Image
-
-import matplotlib.pyplot as plt
-import cv2
-import utils
-import numpy as np
 import torch
 
 
@@ -58,17 +48,6 @@ class GameCartridgeDiscriminatorDataset(Dataset):
             tuple: (image, labels) open image_path and return the tuple (image,label) related to the index-th element
         """
 
-        # resize_transform = transforms.Compose(
-        #     [
-        #         transforms.ToPILImage(),
-        #         transforms.Resize(224, antialias=True),
-        #         # transforms.CenterCrop(224),
-        #         transforms.ToTensor(),
-        #         transforms.Normalize(
-        #             mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-        #         ),
-        #     ]
-        # )
         resize_transform = v2.Compose(
             [
                 v2.Resize(256, antialias=True),
@@ -83,9 +62,17 @@ class GameCartridgeDiscriminatorDataset(Dataset):
         return image, torch.tensor(label_binary, dtype=torch.float32)
 
     def build_binary_label_vector(self, index: int):
+        """Return the label corresponding to a binary vector
+
+        Args:
+            index (int): Sample index
+
+        Returns:
+            List[int]: Label binary vector
+        """
         label = self.samples[index][1]  # get label
 
-        label = label.split(" ")  # [console, true/false]
+        label = label.split(" ")  # [console, {true,false}]
 
         cartridge = self.labels_to_idx[label[0]]
         label_binary = [
@@ -95,8 +82,10 @@ class GameCartridgeDiscriminatorDataset(Dataset):
             0,
             0,
         ]
-        label_binary[cartridge] = 1
-        value = self.originality_labels_to_idx[label[1]]
+        label_binary[cartridge] = 1  # set one in the console index
+        value = self.originality_labels_to_idx[
+            label[1]
+        ]  # set one in the true/false index
 
         label_binary[value] = 1
         return label_binary

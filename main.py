@@ -1,8 +1,6 @@
 import utils
-import model
 import random
 from itertools import product
-from gcd_dataset import GameCartridgeDiscriminatorDataset
 from gcd_datamodule import GameCartridgeDiscriminatorDatamodule
 import tqdm
 from model import GameCartridgeDiscriminator
@@ -11,10 +9,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from termcolor import colored
 import os
 import subprocess
-import threading
 import torch
-from pytorch_lightning.profilers import PyTorchProfiler
-import time
 import pytorch_lightning as pl
 import gc
 
@@ -23,7 +18,7 @@ random.seed(utils.RANDOM_SEED)
 
 label_names = ["DS", "GBA", "GB", "true", "false"]
 
-
+# Create the parameters combinations for grid search
 hyp_comb = list(
     product(
         utils.FC_LR,
@@ -43,16 +38,7 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
     cnn_wd = hyperparameter[3]
     num_epochs = hyperparameter[4]
 
-    filename = (
-        str(fc_lr)
-        + ", "
-        + str(cnn_lr)
-        + ", "
-        + str(fc_wd)
-        + ", "
-        + str(cnn_wd)
-        + "resnet50"
-    )
+    filename = str(fc_lr) + ", " + str(cnn_lr) + ", " + str(fc_wd) + ", " + str(cnn_wd)
     print(filename)
 
     if filename + ".ckpt" in os.listdir(utils.CKPT_SAVE_DIR_NAME):

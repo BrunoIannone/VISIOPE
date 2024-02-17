@@ -2,21 +2,24 @@ from load_data import load_data
 from sklearn.model_selection import train_test_split
 import time
 import random
+from pathlib import Path
 
 
 class DataProcessor:
     """
-    Class that implements some methods for data processing
+    Class that builds train, validation and test set.
     """
 
-    def __init__(self, samples_path: str, kept_size: float, random_state: int) -> None:
+    def __init__(self, samples_path: Path, kept_size: float, random_state: int) -> None:
         """Data Processor init function.
 
         Args:
-            train_data_path (str): Path to train data
-            test_data_path (str): Path to test data
-            test_size (float): Percentage of data to split to evaluation set
-            random_state (int): seed for random operations
+            samples_path (Path): Path to samples csv containing rows with the following structure: sample_path, console {true,false}.
+            kept_size (float): Percentage of data to retain for validation/test. The formers will have, each one, half of these data.
+            random_state (int): Seed for random split.
+
+        Raises:
+            ValueError: If there are no data to load in samples_path
         """
 
         self.samples = load_data(samples_path)
@@ -35,94 +38,33 @@ class DataProcessor:
 
         self.labels_name = self._extract_labels()
 
-    def count_labels(self, labels_list):
-        """
-        Count the occurrences of each label in the training data.
-
-        Returns:
-        dict: A dictionary where keys are unique labels and values are the count of each label in the training data.
-
-        """
-
-        cnt = {}
-        for label in labels_list:
-            if label not in cnt:
-                cnt[label] = 1
-            else:
-                cnt[label] = cnt[label] + 1
-
-        return cnt
-
-    def _extract_labels(self):
-        """
-        Extract unique labels from the training data.
-
-        Returns:
-        set: A set containing unique labels converted to strings.
-
-        """
-        labels_set = set()
-
-        for label in self.y_train:
-            labels_set.add(str(label))
-
-        return sorted(labels_set)
-
     def _data_load_and_process_data(self, kept_size: float, random_state: int):
         """
 
         Process training and test data.
 
         Args:
-        test_size (float): The proportion of the dataset to include in the test split.
-        random_state (int): Seed for random shuffle before splitting.
+        kept_size (float): Percentage of the dataset to reatain for validaton and test set.
+        random_state (int): Seed for random split.
 
         Returns:
-        tuple: x_train, y_train, x_eval, y_eval, train_samples, train_labels, test_samples
-
-        Raises:
-        ValueError: If train_labels is None or if the dimensions of train_samples and train_labels do not match.
-
+        tuple: x_train, y_train, x_eval, y_eval, x_test, y_test
 
         """
-
-        # x_train = self.train_data[0]
-        # y_train = self.train_data[1]
-
-        # if y_train is None:
-        #     raise ValueError("train_labels is None, wrong file?")
-        # if x_train.shape[0] != x_train.shape[0]:
-        #     raise ValueError("train_samples and train_labels dimension mismatch")
-
-        # test_samples = self.test_data[0]
-        # test_labels = self.test_data[1]
-
-        # x_eval = self.val_data[0]
-        # y_eval = self.val_data[1]
-
+        # Build train data and kept set
         x_train, x_kept, y_train, y_kept = train_test_split(
             self.samples[0],
             self.samples[1],
             test_size=kept_size,
             random_state=random_state,
         )
+        # Build validation and test set
         x_test, x_eval, y_test, y_eval = train_test_split(
             x_kept,
             y_kept,
             test_size=kept_size / 2,
             random_state=random_state,
         )
-
-        # SCOMMENTA PER CONTARE LABEL A SCELTA
-        # cnt = 0
-        # for elem in x_test:
-
-        #     elem = elem.split("/")
-        #     # print(elem[6].split(" ")[0])
-        #     if elem[6].split(" ")[1] == "false":
-        #         # print("SI")
-        #         cnt += 1
-        # print(cnt)
 
         return (
             x_train,

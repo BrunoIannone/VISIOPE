@@ -1,32 +1,15 @@
 from typing import List
-from pytorch_lightning.utilities.types import (
-    EVAL_DATALOADERS,
-    STEP_OUTPUT,
-    TRAIN_DATALOADERS,
-)
 import torch
-import torch.nn as nn
-import matplotlib.pyplot as plt
 import torch.nn.functional as F
 import pytorch_lightning as pl
 import time
 import torchmetrics
 import utils
 from torchmetrics.classification import MultilabelConfusionMatrix
-from torchvision import transforms, models
-import numpy as np
-import datetime
-from transformers import ViTImageProcessor, ViTForImageClassification
-import os
 from torchvision.transforms import v2
-from torchvision.io import read_image
-from torchvision import transforms
 from PIL import Image
 from tqdm import tqdm
 from pathlib import Path
-from torchvision.io import read_image
-
-# from plot_utils import plot_confusion_matrix
 from dataset_handler import DatasetHandler
 
 
@@ -40,14 +23,12 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         fc_wd: float = 0.0,
         cnn_wd: float = 0.0,
         cf_matrix_filename: str = "",
-        plot_save_path: str = "",
     ) -> None:
         """Car action model init function
 
         Args:
             num_labels (int): Number of chosen consoles
-            console_names(List[str]): Console names, list of string. Optional
-            console_labels(List[int]): List of console labels in integer values
+            label_names(List[str]): Console names, list of string. Optional
             fc_lr (float, optional): Linear layer learning rate. Defaults to 0.0.
             cnn_lr (float, optional): CNN learning rate. Defaults to 0.0.
             fc_wd (float, optional): Linear layer weight decay. Defaults to 0.0.
@@ -61,8 +42,8 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
         self.cf_matrix_filename = cf_matrix_filename
 
-        self.model = models.resnet18(weights="ResNet18_Weights.DEFAULT")
-        self.model.fc = torch.nn.Linear(self.model.fc.in_features, 5)
+        self.model = utils.CNN_MODEL
+        self.model.fc = torch.nn.Linear(self.model.fc.in_features, len(self.num_labels))
 
         self.fc_lr = fc_lr
         self.fc_wd = fc_wd
@@ -82,7 +63,7 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         self.test_accuracy = torchmetrics.Accuracy(
             task="multilabel", num_labels=self.num_labels
         )
-        self.conf_mat = MultilabelConfusionMatrix(num_labels=5)
+        self.conf_mat = MultilabelConfusionMatrix(num_labels=self.num_labels)
 
         self.save_hyperparameters()
 
@@ -107,7 +88,6 @@ class GameCartridgeDiscriminator(pl.LightningModule):
                 "weight_decay": self.cnn_wd,
             },
         ]
-        # optimizer = torch.optim.AdamW(self.model.parameters())
         optimizer = torch.optim.AdamW(groups)
 
         return optimizer
@@ -186,7 +166,6 @@ class GameCartridgeDiscriminator(pl.LightningModule):
     def predict(self, to_predict_path):
         pred = []
         to_predict = self._stack_and_preprocess_for_prediction(to_predict_path)
-        print(len(to_predict))
         for image in to_predict:
 
             resize_transform = v2.Compose(
@@ -205,19 +184,14 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
             threshold = 0.5
             predicted_probs = torch.sigmoid(p)
-            print(float(predicted_probs[0][4]))
-            falsity_check = float(predicted_probs[0][4]) > 0.4
-            print(predicted_probs)
+
             y_pred = (predicted_probs > threshold).float()
-            if falsity_check:
-                y_pred[0][4] = 1
-                y_pred[0][3] = 0
+
             pred.append(y_pred)
 
         return pred
 
     def _stack_and_preprocess_for_prediction(self, path):
-        # def stack_and_resize_images2(image_list, output_path, resize_dimensions=(300, 300)):
         to_predict_list = []
         dataset_handler = DatasetHandler(path, True)
         print(dataset_handler.samples)
@@ -251,19 +225,7 @@ class GameCartridgeDiscriminator(pl.LightningModule):
                 stacked_image.paste(image1, (0, 0))
                 stacked_image.paste(image2, (new_width1, 0))
                 to_predict_list.append(stacked_image)
-                # Save the stacked and resized image to the specified output path
-                # stacked_image.save(
-                #     os.path.join(
-                #         output_path
-                #         / str(
-                #             image_tuple[2]
-                #             + " "
-                #             + image_tuple[0].split("$")[2].split(".")[0]
-                #         ),
-                #         str(i) + "$" + image_tuple[0].split("$")[2],
-                #     ),
-                # )
-                # i += 1
+
             except Exception as e:
                 print(f"Error: {e}")
         return to_predict_list

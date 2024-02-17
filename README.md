@@ -65,11 +65,11 @@ For instance:
     *GBA
 
 
-Notice the image names that follow the following conventions **{front,rear}$number${true,false}**.extension where number is a unique numeric identifier for each couple. You can use the DatasetIntegrityChecker class to perform the integrity check, or the quick call in the DatasetHandler class.
+Notice the image names that follow the following conventions **{front,rear}$number${true,false}.extension** where number is a unique numeric identifier for each couple. You can use the DatasetIntegrityChecker class to perform the integrity check, or the quick call in the DatasetHandler class.
 
 2. Stacked Data
 
-Once the dataset is ready, is it possible to use the stack_front_rear_images() method in utils.py to create the Stacked Data folder. These images will be the actual inputs to the model
+Once the dataset is ready, is it possible to use the *stack_front_rear_images()* method in utils.py to create the Stacked Data folder. These images will be the actual inputs to the model
 
 3. Predict
 
@@ -77,4 +77,4 @@ The prediction folder follows the same structure of Data folder, but images name
 
 ## In conclusion
 
-Once the Stacked Data folder is ready, the training pipeline can be launched by executing the main.py.
+Once the Stacked Data folder is ready, the training pipeline can be launched by executing the main.py. An example of building the dataset and predicting new samples can be found in dataset_utils.py

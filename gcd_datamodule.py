@@ -4,18 +4,17 @@ import gcd_dataset
 import utils
 from data_processor import DataProcessor
 import torch
+from pathlib import Path
 
 
 class GameCartridgeDiscriminatorDatamodule(LightningDataModule):
     """Datamodule for game cartridge discriminator dataset."""
 
-    def __init__(self, samples_path):
+    def __init__(self, samples_path: Path):
         """Init function for game cartridge discriminator datamodule
 
         Args:
-            training_data (List[tuple]): List of tuple (image,label)
-            valid_data (List[tuple]): List of tuple (image,label)
-            test_data (List[tuple]): List of tuple (image,label)
+            samples_path (Path): Path to samples csv containing rows with the following structure: sample_path, console {true,false}
         """
         super().__init__()
 

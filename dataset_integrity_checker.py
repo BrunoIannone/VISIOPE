@@ -15,52 +15,6 @@ class DatasetIntegrityChecker:
         """
         self.root_folder = root_folder
 
-    def rename_images(self, front_to_translate: str, rear_to_translate: str):
-        """Auxiliary function for translating image headers.
-        Args:
-            front_to_translate (str):Original string to traslate in front
-            rear_to_translate (str): Original string to translate in rear
-
-        """
-
-        # Iterate through each folder in the root path
-        for console_folder in os.listdir(self.root_folder):
-            # Check if the item in the root path is a directory
-            if os.path.isdir(self.root_folder / console_folder):
-                # Iterate through each console folder in the current folder
-                for game_folder in os.listdir(self.root_folder / console_folder):
-                    # Check if the item in the console folder is a directory
-                    if os.path.isdir(self.root_folder / console_folder / game_folder):
-                        for image in os.listdir(
-                            self.root_folder / console_folder / game_folder
-                        ):
-                            # Split the image name using "$"
-                            image_parts = image.split("$")
-
-                            # Check if the first part is "fronte" and replace it with "front"
-                            if image_parts[0] == front_to_translate:
-                                image_parts[0] = "front"
-                            # Check if the first part is "retro" and replace it with "rear"
-                            elif image_parts[0] == rear_to_translate:
-                                image_parts[0] = "rear"
-
-                            # Join the modified parts to get the new image name
-                            new_image_name = "$".join(image_parts)
-
-                            # Rename the image file
-                            old_image_path = (
-                                self.root_folder / console_folder / game_folder / image
-                            )
-                            new_image_path = (
-                                self.root_folder
-                                / console_folder
-                                / game_folder
-                                / new_image_name
-                            )
-                            os.rename(old_image_path, new_image_path)
-
-        print(colored("Done", "green"))
-
     def _filename_sanity_check(
         self,
         headers: List[str],
@@ -107,21 +61,6 @@ class DatasetIntegrityChecker:
                 "Sanity check failed: headers[2] is not true or false.\n fault occurred in: "
                 + str(self.root_folder / console_folder / image_folder)
             )
-
-    def _search_word(pattern, list, number, label):  # Deprecated
-        for elem in list:
-            print(elem)
-            elem = elem.split("$")
-            print(elem[2].split(".")[0])
-            if (
-                elem[0] == "rear"
-                and elem[1] == str(number)
-                and elem[2].split(".")[0] == label
-            ):
-                print(elem)
-                return True
-
-        return False
 
     def _search_word2(
         self, rear_image_set: set, number: int, label: str, extension: str
@@ -226,8 +165,8 @@ class DatasetIntegrityChecker:
         return True
 
 
-# root_folder = Path(DATA_PATH)
+# Uncomment to perform sanity check on the dataset
 
+# root_folder = Path(DATA_PATH)
 # sanity_checker = DatasetIntegrityChecker(root_folder)
-# sanity_checker.rename_images("fronte", "retro")
 # sanity_checker.dataset_sanity_check()
