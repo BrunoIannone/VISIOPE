@@ -49,32 +49,39 @@ Before running the project it is necessary to install all dependencies. Do it by
 
 1. Data
 
-The data folder expect to have a folder for each console and, in each console folder, there are sub-folders containing the images.
-For instance:
+    The data folder expect to have a folder for each console and, in each console folder, there are sub-folders containing the images.
+    For instance:
 
--**Data**
+    -**Data**
 
-    *DS
-        ** Foto_folder_1
-            *** front$1$true.png
-            *** rear$1$true.png
-            *** front$2$false.png
-            *** rear$2$false.png
-    *GB
+        *DS
+            ** Foto_folder_1
+                *** front$1$true.png
+                *** rear$1$true.png
+                *** front$2$false.png
+                *** rear$2$false.png
+        *GB
 
-    *GBA
+        *GBA
 
 
-Notice the image names that follow the following conventions **{front,rear}$number${true,false}.extension** where number is a unique numeric identifier for each couple. You can use the *DatasetIntegrityChecker* class to perform the integrity check, or the quick call in the *DatasetHandler* class.
+    Notice the image names that follow the following conventions **{front,rear}$number${true,false}.extension** where number is a unique numeric identifier for each couple. You can use the *DatasetIntegrityChecker* class to perform the integrity check, or the quick call in the *DatasetHandler* class.
 
 2. Stacked Data
 
-Once the dataset is ready,  it is possible to use the *stack_front_rear_images()* method in utils.py to create the Stacked Data folder. These images will be the actual input to the model
+    Once the dataset is ready,  it is possible to use the *stack_front_rear_images()* method in utils.py to create the Stacked Data folder. These images will be the actual input to the model
 
 3. Predict
 
-The prediction folder follows the same structure of Data folder, but images names won't have the {true,false} part. The model *predict()* method will take care of stacking the images, so no need on stacking them before. 
+    The prediction folder follows the same structure of Data folder, but images names won't have the {true,false} part. The model *predict()* method will take care of stacking the images, so no need on stacking them before. 
+
+4. Saves
+
+    This folder contains 3 subfolders: ckpt, conf_mat and logs. In the first one the model checkpoints (.ckpt) are stored; in the second one the confusion matrix on test end is saved as .png while on the last one are saved the logs of the model evolution during training (logging is performed with Tensorboard)
+
 
 ## In conclusion
 
-Once the Stacked Data folder is ready, the training pipeline can be launched by executing the main.py. An example of building the dataset and predicting new samples can be found in dataset_utils.py
+    Once the Stacked Data folder is ready, the training pipeline can be launched by executing the main.py. An example of building the dataset and predicting new samples can be found in dataset_utils.py.
+
+    **N.B. The folder structure is not included in the repo and must be replicated accordingly.**
