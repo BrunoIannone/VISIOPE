@@ -84,5 +84,5 @@ Before running the project it is necessary to install all dependencies. Do it by
 
     Once the Stacked Data folder is ready, the training pipeline can be launched by executing the main.py. An example of building the dataset and predicting new samples can be found in dataset_utils.py.
     
-**\ N.B. The folder structure is not included in the repo and must be replicated accordingly**
+**N.B. The folder structure is not included in the repo and must be replicated accordingly**
     
