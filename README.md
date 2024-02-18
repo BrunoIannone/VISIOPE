@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is the project for "Vision and perception" exam.
+This is the project for *"Vision and perception"* exam.
 
 ## Installing dependencies
 
@@ -22,23 +22,23 @@ Before running the project it is necessary to install all dependencies. Do it by
     
 3. model.py
 
-    This file contains the model "GameCartridgeDiscriminator".
+    This file contains the  *"GameCartridgeDiscriminator"* model.
 
 4. dataset_handler.py
 
-    Implement the class "DatasetHandler" that contains methods for building the dataset.
+    Implement the  *"DatasetHandler"* class that contains methods for building the dataset.
 
 5. dataset_integrity_checker.py
 
-   Implement the class "DatasetIntegrityCheckerChecks" that checks if the dataset follows the correct naming conventions and that there are fronts for each rear image.
+   Implement the class *"DatasetIntegrityCheckerChecks"* that checks if the dataset follows the correct naming conventions and that there are fronts for each rear image.
 
 6. data_processor.py
 
-    Implement the "DataProcessor" class that builds training, validation and test set.
+    Implement the *"DataProcessor"* class that builds training, validation and test set.
 
 7. gcd_dataset.py and gcd_datamodule.py
 
-    These two files contains respectively the "GameCartridgeDiscriminatorDataset" class and "GameCartridgeDiscriminatorDatamodule" class. The former creates the couples (sample, label) while the latter loads these during the actual training, validation or test step.
+    These two files contains respectively the *"GameCartridgeDiscriminatorDataset"* class and *"GameCartridgeDiscriminatorDatamodule"* class. The former creates the couples (sample, label) while the latter loads these during the actual training, validation or test step.
 
 8. load_data.py
 
@@ -52,7 +52,7 @@ Before running the project it is necessary to install all dependencies. Do it by
 The data folder expect to have a folder for each console and, in each console folder, there are sub-folders containing the images.
 For instance:
 
--Data
+-**Data**
 
     *DS
         ** Foto_folder_1
@@ -65,15 +65,15 @@ For instance:
     *GBA
 
 
-Notice the image names that follow the following conventions **{front,rear}$number${true,false}.extension** where number is a unique numeric identifier for each couple. You can use the DatasetIntegrityChecker class to perform the integrity check, or the quick call in the DatasetHandler class.
+Notice the image names that follow the following conventions **{front,rear}$number${true,false}.extension** where number is a unique numeric identifier for each couple. You can use the *DatasetIntegrityChecker* class to perform the integrity check, or the quick call in the *DatasetHandler* class.
 
 2. Stacked Data
 
-Once the dataset is ready, is it possible to use the *stack_front_rear_images()* method in utils.py to create the Stacked Data folder. These images will be the actual inputs to the model
+Once the dataset is ready,  it is possible to use the *stack_front_rear_images()* method in utils.py to create the Stacked Data folder. These images will be the actual input to the model
 
 3. Predict
 
-The prediction folder follows the same structure of Data folder, but images names won't have the {true,false} part. The model predict() method will take care of stacking the images, so no need on stacking them before. 
+The prediction folder follows the same structure of Data folder, but images names won't have the {true,false} part. The model *predict()* method will take care of stacking the images, so no need on stacking them before. 
 
 ## In conclusion
 
