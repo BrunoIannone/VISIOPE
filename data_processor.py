@@ -7,7 +7,7 @@ from pathlib import Path
 
 class DataProcessor:
     """
-    Class that builds train, validation and test set.
+    Data Processor class that builds train, validation and test set.
     """
 
     def __init__(self, samples_path: Path, kept_size: float, random_state: int) -> None:

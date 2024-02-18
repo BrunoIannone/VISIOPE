@@ -11,7 +11,7 @@ class DatasetIntegrityChecker:
         """DatasetIntegrityChecker init function
 
         Args:
-            root_folder (Path): Root folder Path object. (Path(root_folder_path))
+            root_folder (Path): Root folder Path object.
         """
         self.root_folder = root_folder
 
@@ -118,9 +118,6 @@ class DatasetIntegrityChecker:
     def dataset_sanity_check(self):
         """Function that checks dataset sanity. Check is successfull if image names follow the convention {front,rear}$number${true,false}
         and for each front there is a rear with the same number.
-
-        Args:
-            root_folder (str): Root folder path
 
         Returns:
             bool: True if sanity check is successfull.

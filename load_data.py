@@ -4,13 +4,14 @@ import numpy as np
 
 
 def load_data(csv_filepath):
-    """
-    Load data from a csv file.
+    """Load data from a csv file.
 
-    :param csv_filepath: path of the .csv file containing the data to load/extract
+    Args:
+        csv_filepath (Path): path of the .csv file containing the data to load
 
-    :return X: array of values associated with the inputs of the data contained in the .csv file
-    :return Y: array of values associated with the labels of the data contained in the .csv file or None if the file does not contain labels
+    Returns:
+        samples: array of values associated with the inputs of the data contained in the .csv file
+        labels: array of values associated with the labels of the data contained in the .csv file or None if the file does not contain labels
     """
 
     data = pd.read_csv(csv_filepath)

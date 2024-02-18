@@ -31,7 +31,7 @@ FC_LR = [1e-2, 1e-3, 1e-4]
 FC_WD = [0, 0.001, 0.01, 0.1]
 CNN_LR = [1e-4, 1e-5]
 CNN_WD = [0, 0.001, 0.01, 0.1]
-CNN_MODEL = models.resnet18(weights="ResNet18_Weights.DEFAULT")
+CNN_MODEL = models.resnet18(weights="ResNet18_Weights.DEFAULT")  # Change on needs
 #########################################
 
 
@@ -95,10 +95,10 @@ def stack_front_rear_images(image_list: List, output_path: str):
 
 
 def build_couples(dir: Path):
-    """Build a .csv having rows with the following structure: sample_path, sample_path, console {true,false}
+    """Build a .csv having rows with the following structure: sample_path, console {true,false}
 
     Args:
-        dir (Path): Dataset folder
+        dir (Path): Path to dataset folder
 
 
     """

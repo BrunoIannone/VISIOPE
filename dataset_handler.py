@@ -22,7 +22,7 @@ class DatasetHandler:
 
         Note:
             The `_build_couples` method is used internally to construct sample lists from the provided folders.
-            On the other hand, "_build_couples_for_prediction()" does the same, but for prediction step.
+            On the other hand, "_build_couples_for_prediction()" does the same, when prediction = True.
         """
         self.root_folder = root_folder
 
@@ -32,7 +32,7 @@ class DatasetHandler:
             self.samples = self._build_couples()
 
     def _find_matching_rear_image(self, image_path: str, console: str):
-        """Auxiliary finction for _build_couples() that finds matching rear images for each front image.
+        """Auxiliary function for _build_couples() that finds matching rear image for each front image.
 
         Args:
             image_path (str): The path to the directory containing the front and rear images.
@@ -95,7 +95,7 @@ class DatasetHandler:
         DatasetIntegrityChecker(self.root_folder).dataset_sanity_check()
 
     def _build_couples_for_prediction(self):
-        """Builds pairs of front and rear images for all consoles and image folders within the root folder.
+        """Builds pairs of front and rear images for all consoles and image folders within the root folder. Used for prediction step.
 
         Returns:
             list: A list of tuples, each containing paths to matching front and rear images, along with the corresponding console object.
@@ -116,7 +116,7 @@ class DatasetHandler:
         return res
 
     def _find_matching_rear_image_for_prediction(self, image_path: str):
-        """Auxiliary function for _build_couples() that finds matching rear images for each front image.
+        """Auxiliary function for _build_couples_for_prediction() that finds matching rear images for each front image.
 
         Args:
             image_path (str): The path to the directory containing the front and rear images.

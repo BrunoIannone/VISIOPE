@@ -24,7 +24,7 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         cnn_wd: float = 0.0,
         cf_matrix_filename: str = "",
     ) -> None:
-        """Car action model init function
+        """Game cartridge discriminator action model init function
 
         Args:
             num_labels (int): Number of chosen consoles
@@ -164,6 +164,15 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         utils.save_conf_mat(fig_, self.cf_matrix_filename)
 
     def predict(self, to_predict_path):
+        """Predict method
+
+        Args:
+            to_predict_path (Path): Prediction folder path
+
+        Returns:
+            List: List containing the predicted binary vector for each sample in the folder
+
+        """
         pred = []
         to_predict = self._stack_and_preprocess_for_prediction(to_predict_path)
         for image in to_predict:

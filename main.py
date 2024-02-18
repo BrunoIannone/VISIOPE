@@ -105,6 +105,7 @@ for hyperparameter in tqdm.tqdm(hyp_comb, colour="yellow", desc="Tried combinati
         ckpt_path="best",
     )
 
+    # Cleanup to avoid out of memory error during next training
     del gbc_datamodule
     del trainer
     del logger
