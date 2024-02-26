@@ -43,7 +43,7 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         self.cf_matrix_filename = cf_matrix_filename
 
         self.model = utils.CNN_MODEL
-        self.model.fc = torch.nn.Linear(self.model.fc.in_features, len(self.num_labels))
+        self.model.fc = torch.nn.Linear(self.model.fc.in_features, self.num_labels)
 
         self.fc_lr = fc_lr
         self.fc_wd = fc_wd
