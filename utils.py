@@ -110,7 +110,7 @@ def build_couples(samples: List):
         # Create a .CSV writer object
         csv_writer = csv.writer(csv_file)
         # Write the header
-        csv_writer.writerow(["Front","Rear" "Label"])
+        csv_writer.writerow(["Front","Rear", "Label"])
         for elem in samples:
             # Write the predictions to the .CSV file
             csv_writer.writerow((str(elem[0]), elem[1], elem[2]))

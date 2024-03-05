@@ -65,6 +65,8 @@ class DataProcessor:
 
         """
         # Build train data and kept set
+        print(self.samples[0], "QUI")
+        time.sleep(5)
         x_train, x_kept, y_train, y_kept = train_test_split(
             self.samples[0],
             self.samples[1],
