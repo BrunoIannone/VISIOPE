@@ -103,7 +103,7 @@ def build_couples(samples: List):
 
     """
     res = []
-    
+    print(samples, "PENE") 
     csv_file_path = "couples.csv"
     # Open the .CSV file in write mode
     with open(csv_file_path, "w", newline="") as csv_file:

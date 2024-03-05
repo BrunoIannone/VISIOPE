@@ -30,7 +30,7 @@ class DatasetHandler:
             self.samples = self._build_couples_for_prediction()
         else:
             self.samples = self._build_couples()
-            print(self.samples)
+
 
     def _find_matching_rear_image(self, image_path: str, console: str):
         """Auxiliary function for _build_couples() that finds matching rear image for each front image.

@@ -8,13 +8,13 @@ from pathlib import Path
 
 # DATASET BUILD
 
-# dataset_handler = DatasetHandler(utils.DATA_PATH)
+dataset_handler = DatasetHandler(utils.DATA_PATH)
 # dataset_handler.perform_sanity_check()
 # utils.stack_and_resize_images2(
 #     dataset_handler.samples, utils.STACKED_PATH
 # )
 
-# utils.build_couples(utils.STACKED_PATH)
+utils.build_couples(dataset_handler.samples)
 
 
 # PREDICTION
