@@ -37,7 +37,20 @@ class DataProcessor:
         ) = self._data_load_and_process_data(kept_size, random_state)
 
         self.labels_name = self._extract_labels()
+    def _extract_labels(self):
+        """
+        Extract unique labels from the training data.
 
+        Returns:
+        set: A set containing unique labels converted to strings.
+
+        """
+        labels_set = set()
+
+        for label in self.y_train:
+            labels_set.add(str(label))
+
+        return sorted(labels_set)
     def _data_load_and_process_data(self, kept_size: float, random_state: int):
         """
 
