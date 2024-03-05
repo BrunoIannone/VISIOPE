@@ -94,7 +94,7 @@ def stack_front_rear_images(image_list: List, output_path: str):
             print(f"Error: {e}")
 
 
-def build_couples(dir: Path):
+def build_couples(samples: List):
     """Build a .csv having rows with the following structure: sample_path, console {true,false}
 
     Args:
@@ -103,20 +103,17 @@ def build_couples(dir: Path):
 
     """
     res = []
-    for console_folder in os.listdir(dir):
-        for cart_image in os.listdir(dir / console_folder):
-            res.append((dir / console_folder / cart_image, console_folder))
-
+    
     csv_file_path = "couples.csv"
     # Open the .CSV file in write mode
     with open(csv_file_path, "w", newline="") as csv_file:
         # Create a .CSV writer object
         csv_writer = csv.writer(csv_file)
         # Write the header
-        csv_writer.writerow(["Image", "Label"])
-        for elem in res:
+        csv_writer.writerow(["Front","Rear" "Label"])
+        for elem in samples:
             # Write the predictions to the .CSV file
-            csv_writer.writerow((str(elem[0]), elem[1]))
+            csv_writer.writerow((str(elem[0]), elem[1], elem[2]))
 
     print(f"Train data been written to {csv_file_path}.")
 
