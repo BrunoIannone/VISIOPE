@@ -13,7 +13,7 @@ dataset_handler = DatasetHandler(utils.DATA_PATH)
 # utils.stack_and_resize_images2(
 #     dataset_handler.samples, utils.STACKED_PATH
 # )
-
+print(dataset_handler.samples)
 utils.build_couples(dataset_handler.samples)
 
 

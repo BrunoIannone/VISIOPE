@@ -37,6 +37,7 @@ class DataProcessor:
         ) = self._data_load_and_process_data(kept_size, random_state)
 
         self.labels_name = self._extract_labels()
+
     def _extract_labels(self):
         """
         Extract unique labels from the training data.
@@ -51,6 +52,7 @@ class DataProcessor:
             labels_set.add(str(label))
 
         return sorted(labels_set)
+
     def _data_load_and_process_data(self, kept_size: float, random_state: int):
         """
 
@@ -65,8 +67,8 @@ class DataProcessor:
 
         """
         # Build train data and kept set
-        print(self.samples[0], "QUI")
-        time.sleep(5)
+        # print(self.samples[0], "QUI")
+        # time.sleep(5)
         x_train, x_kept, y_train, y_kept = train_test_split(
             self.samples[0],
             self.samples[1],

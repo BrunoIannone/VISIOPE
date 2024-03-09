@@ -17,21 +17,23 @@ PATH = Path(os.path.dirname(__file__))
 STACKED_PATH = PATH / "Stacked Data"
 DATA_PATH = PATH / "Data"
 LOG_SAVE_DIR_NAME = PATH / "Saves/logs/"
-CKPT_SAVE_DIR_NAME = PATH / "Saves/"
+CKPT_SAVE_DIR_NAME = PATH / "Saves/ckpt"
 PLOT_SAVE_PATH = PATH / "Saves/conf_mat/"
 PREDICT_PATH = PATH / "Predict"
 #####################################
 
 ############ HYPERPARAMETERS ############
 NUM_EPOCHS = [100]
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 NUM_WORKERS = 8
 TEST_SIZE = 0.3
-FC_LR = [1e-2, 1e-3, 1e-4]
+FC_LR = [1e-3, 1e-4]
 FC_WD = [0, 0.001, 0.01, 0.1]
 CNN_LR = [1e-4, 1e-5]
 CNN_WD = [0, 0.001, 0.01, 0.1]
-CNN_MODEL = models.resnet18(weights="ResNet18_Weights.DEFAULT")  # Change on needs
+CNNF_MODEL = models.resnet18(weights="ResNet18_Weights.DEFAULT")  # Change on needs
+CNNR_MODEL = models.resnet18(weights="ResNet18_Weights.DEFAULT")  # Change on needs
+
 #########################################
 
 
@@ -103,17 +105,19 @@ def build_couples(samples: List):
 
     """
     res = []
-    print(samples, "PENE") 
+    print(samples, "PENE")
     csv_file_path = "couples.csv"
     # Open the .CSV file in write mode
     with open(csv_file_path, "w", newline="") as csv_file:
         # Create a .CSV writer object
         csv_writer = csv.writer(csv_file)
         # Write the header
-        csv_writer.writerow(["Front","Rear", "Label"])
+        csv_writer.writerow(["Front£Rear", "Label"])
         for elem in samples:
+            label = elem[0].split("$")[2].split(".")[0]
+            print(label)
             # Write the predictions to the .CSV file
-            csv_writer.writerow((str(elem[0]), elem[1], elem[2]))
+            csv_writer.writerow((str(elem[0] + "£" + elem[1]), elem[2] + " " + label))
 
     print(f"Train data been written to {csv_file_path}.")
 

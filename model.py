@@ -11,6 +11,7 @@ from PIL import Image
 from tqdm import tqdm
 from pathlib import Path
 from dataset_handler import DatasetHandler
+import torch.nn as nn
 
 
 class GameCartridgeDiscriminator(pl.LightningModule):
@@ -42,8 +43,16 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
         self.cf_matrix_filename = cf_matrix_filename
 
-        self.model = utils.CNN_MODEL
-        self.model.fc = torch.nn.Linear(self.model.fc.in_features, self.num_labels)
+        self.resnet_front = utils.CNNF_MODEL
+        self.resnet_rear = utils.CNNR_MODEL
+
+        # Remove the last fully connected layer for both models
+        self.resnet_front = nn.Sequential(*list(self.resnet_front.children())[:-1])
+        self.resnet_rear = nn.Sequential(*list(self.resnet_rear.children())[:-1])
+
+        # Define the classification layers for front and rear images
+        self.fc_final = nn.Linear(512 * 2, 5)
+        # self.model.fc = torch.nn.Linear(self.model.fc.in_features, self.num_labels)
 
         self.fc_lr = fc_lr
         self.fc_wd = fc_wd
@@ -67,25 +76,39 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
         self.save_hyperparameters()
 
-    def forward(self, x):
-        x = self.model(x)
-        return x
+    def forward(self, front_image, rear_image):
+        # Forward pass for front image
+        features_front = self.resnet_front(front_image)
+        features_front = features_front.view(features_front.size(0), -1)
+
+        # Forward pass for rear image
+        features_rear = self.resnet_rear(rear_image)
+        features_rear = features_rear.view(features_rear.size(0), -1)
+
+        # Concatenate the features from both front and rear images
+        combined_features = torch.cat((features_front, features_rear), dim=1)
+
+        # Final classification
+        final_output = self.fc_final(combined_features)
+
+        return final_output
 
     def configure_optimizers(self):
         groups = [
             {
-                "params": self.model.fc.parameters(),
-                "lr": self.fc_lr,
-                "weight_decay": self.fc_wd,
-            },
-            {
-                "params": [
-                    param
-                    for name, param in self.model.named_parameters()
-                    if "fc" not in name
-                ],
+                "params": self.resnet_front.parameters(),
                 "lr": self.cnn_lr,
                 "weight_decay": self.cnn_wd,
+            },
+            {
+                "params": self.resnet_rear.parameters(),
+                "lr": self.cnn_lr,
+                "weight_decay": self.cnn_wd,
+            },
+            {
+                "params": self.fc_final.parameters(),
+                "lr": self.fc_lr,
+                "weight_decay": self.fc_wd,
             },
         ]
         optimizer = torch.optim.AdamW(groups)
@@ -94,9 +117,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
 
-        image, labels = train_batch
+        front, rear, labels = train_batch
 
-        outputs = self(image)
+        outputs = self(front, rear)
 
         loss = F.binary_cross_entropy_with_logits(outputs, labels)
 
@@ -111,9 +134,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         return loss
 
     def validation_step(self, val_batch, idx):
-        image, labels = val_batch
+        front, rear, labels = val_batch
 
-        outputs = self(image)
+        outputs = self(front, rear)
 
         threshold = 0.5
         predicted_probs = torch.sigmoid(outputs)
@@ -133,9 +156,9 @@ class GameCartridgeDiscriminator(pl.LightningModule):
         )
 
     def test_step(self, test_batch):
-        image, labels = test_batch
+        front, rear, labels = test_batch
 
-        outputs = self(image)
+        outputs = self(front, rear)
         threshold = 0.5
         predicted_probs = torch.sigmoid(outputs)
         y_pred = (predicted_probs > threshold).float()
