@@ -31,7 +31,6 @@ class DatasetHandler:
         else:
             self.samples = self._build_couples()
 
-
     def _find_matching_rear_image(self, image_path: str, console: str):
         """Auxiliary function for _build_couples() that finds matching rear image for each front image.
 
@@ -111,7 +110,7 @@ class DatasetHandler:
             for image_folder in os.listdir(self.root_folder / console_folder):
                 # print(image_folder)
                 res += self._find_matching_rear_image_for_prediction(
-                    self.root_folder / console_folder / image_folder, console_folder
+                    self.root_folder / console_folder / image_folder
                 )
         print(colored("Couples build successfully", "green"))
         return res
@@ -126,7 +125,7 @@ class DatasetHandler:
             ValueError: If the number of front and rear images is different in the specified directory.
 
         Returns:
-            list: A list of tuples, each containing paths to matching front and rear images, along with the belonging console. (front_image_path,rear_image_path,console_name)
+            list: A list of tuples, each containing paths to matching front and rear images (front_image_path,rear_image_path)
 
         """
         couples = []
